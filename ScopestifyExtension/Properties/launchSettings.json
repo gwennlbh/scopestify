@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "ScopestifyExtension (Package)": {
+      "commandName": "MsixPackage",
+      "doNotLaunchApp": true
+    },
+    "ScopestifyExtension (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
