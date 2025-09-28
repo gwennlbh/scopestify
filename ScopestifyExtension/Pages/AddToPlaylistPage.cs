@@ -39,7 +39,6 @@ internal sealed partial class AddToPlaylistPage : ListPage
                         playlist.Owner?.Id != currentUser?.Id
                             ? $"By {playlist.Owner?.DisplayName}"
                             : "",
-                        playlist.Description ?? "",
                         playlist.Tracks?.Total != null ? $"{playlist.Tracks.Total} tracks" : "",
                     }.Where(s => !string.IsNullOrEmpty(s))
                 ),

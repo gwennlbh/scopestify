@@ -79,11 +79,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                 Title = track.Name ?? "Unnamed track",
                 Subtitle = string.Join(
                     " • ",
-                    [
-                        Utils.Artists(track),
-                        track.Album?.Name ?? "No album",
-                        TimeSpan.FromMilliseconds(track.DurationMs).ToString(@"m\:ss"),
-                    ]
+                    [Utils.Artists(track), track.Album?.Name ?? "No album"]
                 ),
                 Icon = new IconInfo(track.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F"),
                 MoreCommands =
@@ -139,14 +135,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
             )
             {
                 Title = album.Name ?? "Unnamed album",
-                Subtitle = string.Join(
-                    " • ",
-                    [
-                        Utils.Artists(new FullTrack { Artists = album.Artists }),
-                        $"{album.ReleaseDate}",
-                        $"{album.TotalTracks} tracks",
-                    ]
-                ),
+                Subtitle = Utils.Artists(new FullTrack { Artists = album.Artists }),
                 Icon = new IconInfo(album.Images?.FirstOrDefault()?.Url ?? "\uE7C3"),
                 MoreCommands =
                 [
@@ -210,7 +199,6 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                             : playlist?.Owner?.Id != null
                                 ? $"Playlist by {playlist?.Owner?.DisplayName}"
                             : "",
-                            playlist?.Description ?? "",
                             playlist?.Tracks?.Total != null
                                 ? $"{playlist?.Tracks.Total} tracks"
                                 : "",
