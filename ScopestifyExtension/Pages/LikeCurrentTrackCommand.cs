@@ -34,7 +34,7 @@ internal sealed partial class LikeCurrentTrackCommand : InvokableCommand
 
         if (savedTracks.Count > 0 && savedTracks[0])
         {
-            throw new InvalidOperationException($"Track {currentTrack.Name} is already liked");
+            throw new InvalidOperationException($"Track {Utils.TrackFullName(currentTrack)} is already liked");
         }
 
         await spotify.Library.SaveTracks(new LibrarySaveTracksRequest([currentTrack.Id ?? ""]));
