@@ -50,23 +50,29 @@ jobs:
     - name: Security analysis - Package vulnerabilities
       run: |
         echo "Running security analysis..."
-        dotnet list package --vulnerable --include-transitive 2>&1 | Tee-Object -Variable output
-        if ($output -match "has the following vulnerable packages") {
+        $output = dotnet list package --vulnerable --include-transitive 2>&1
+        if ($LASTEXITCODE -eq 0 -and ($output -match "has the following vulnerable packages")) {
           Write-Error "Vulnerable packages detected!"
+          Write-Output $output
           exit 1
+        } elseif ($output -match "Sequence contains no matching element") {
+          echo "✅ No vulnerable packages found."
+        } else {
+          echo "✅ Package vulnerability scan completed successfully."
         }
-        echo "No vulnerable packages found."
       shell: powershell
 
     - name: Check for deprecated NuGet packages
       run: |
         echo "Checking for deprecated packages..."
-        dotnet list package --deprecated 2>&1 | Tee-Object -Variable output
-        if ($output -match "has the following deprecated packages") {
-          Write-Warning "Deprecated packages found - consider updating"
-          echo $output
+        $output = dotnet list package --deprecated 2>&1
+        if ($LASTEXITCODE -eq 0 -and ($output -match "has the following deprecated packages")) {
+          Write-Warning "⚠️ Deprecated packages found - consider updating:"
+          Write-Output $output
+        } elseif ($output -match "Sequence contains no matching element") {
+          echo "✅ No deprecated packages found."
         } else {
-          echo "No deprecated packages found."
+          echo "✅ Deprecated package check completed successfully."
         }
       shell: powershell
 
