@@ -69,7 +69,9 @@ internal sealed partial class AddToPlaylistCommand(string playlistId, string nam
         }
         catch (Exception ex)
         {
-            return CommandResult.ShowToast(new ToastArgs { Message = ex.Message });
+            return CommandResult.ShowToast(
+                new ToastArgs { Message = ex.InnerException?.Message ?? ex.Message }
+            );
         }
     }
 }
