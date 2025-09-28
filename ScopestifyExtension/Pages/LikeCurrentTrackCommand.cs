@@ -50,7 +50,9 @@ internal sealed partial class LikeCurrentTrackCommand : InvokableCommand
         }
         catch (Exception ex)
         {
-            return CommandResult.ShowToast(new ToastArgs { Message = ex.Message });
+            return CommandResult.ShowToast(
+                new ToastArgs { Message = ex.InnerException?.Message ?? ex.Message }
+            );
         }
     }
 }
