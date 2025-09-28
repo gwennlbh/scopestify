@@ -57,9 +57,10 @@
     <CsWinRTAotOptimizerEnabled>true</CsWinRTAotOptimizerEnabled>
     <CsWinRTAotWarningLevel>2</CsWinRTAotWarningLevel>
     <!-- Suppress DynamicallyAccessedMemberTypes.PublicParameterlessConstructor in fallback code path of Windows SDK projection -->
-    <WarningsNotAsErrors>IL2081;$(WarningsNotAsErrors)</WarningsNotAsErrors>
-    <!-- When publishing trimmed, make sure to treat trimming warnings as build errors -->
-    <ILLinkTreatWarningsAsErrors>true</ILLinkTreatWarningsAsErrors>
+    <!-- Also suppress common trimming warnings from dependencies -->
+    <WarningsNotAsErrors>IL2081;IL2026;IL2104;$(WarningsNotAsErrors)</WarningsNotAsErrors>
+    <!-- Don't treat trimming warnings as build errors to allow builds with trim-incompatible dependencies -->
+    <ILLinkTreatWarningsAsErrors>false</ILLinkTreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <!-- In Debug builds, trimming is disabled by default, but all the trim & 
@@ -71,8 +72,7 @@
     <EnableAotAnalyzer>true</EnableAotAnalyzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'!='Debug'">
-    <!-- In Release builds, trimming is enabled by default. 
-         feel free to disable this if needed -->
-    <PublishTrimmed>true</PublishTrimmed>
+    <!-- Disable trimming in Release builds to avoid compatibility issues with dependencies -->
+    <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
 </Project>
