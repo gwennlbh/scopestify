@@ -27,11 +27,11 @@ jobs:
 
     - name: Check formatting
       if: github.event_name == 'pull_request'
-      run: dotnet csharpier --check .
+      run: dotnet csharpier check .
 
     - name: Format code
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: dotnet csharpier .
+      run: dotnet csharpier format .
 
     - name: Commit formatted changes
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'

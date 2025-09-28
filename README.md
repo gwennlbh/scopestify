@@ -14,10 +14,10 @@ This project uses [CSharpier](https://csharpier.com/) for code formatting.
 dotnet tool restore
 
 # Check if code is properly formatted
-dotnet csharpier --check .
+dotnet csharpier check .
 
 # Format all C# files
-dotnet csharpier .
+dotnet csharpier format .
 ```
 
 **Automated Formatting:**
