@@ -69,7 +69,7 @@ jobs:
         run: |
           $publishPath = ".\ScopestifyExtension\bin\" +
             "${{ env.BUILD_CONFIGURATION }}\net9.0-windows10.0.22621.0\" +
-            "${{ matrix.runtime }}\publish"
+            "\${{ matrix.runtime }}\publish"
           $destPath = ".\artifacts\${{ matrix.platform }}\publish"
           if (Test-Path $publishPath) {
             Copy-Item -Path $publishPath -Destination $destPath `
@@ -82,15 +82,14 @@ jobs:
 
       - name: Copy MSIX packages
         run: |
-          $msixPath = ".\ScopestifyExtension\bin\" +
-            "${{ matrix.platform }}\${{ env.BUILD_CONFIGURATION }}\*.msix"
+          $msixBasePath = ".\ScopestifyExtension\bin\" +
+            "${{ matrix.platform }}\${{ env.BUILD_CONFIGURATION }}"
           $appxUploadPath = ".\ScopestifyExtension\AppPackages"
           $destPath = ".\artifacts\${{ matrix.platform }}\packages"
           New-Item -Path $destPath -ItemType Directory -Force
 
           # Copy individual MSIX files if they exist
-          $msixFiles = Get-ChildItem -Path ".\ScopestifyExtension\bin\" +
-            "${{ matrix.platform }}\${{ env.BUILD_CONFIGURATION }}" `
+          $msixFiles = Get-ChildItem -Path $msixBasePath `
             -Filter "*.msix" -ErrorAction SilentlyContinue
           if ($msixFiles) {
             Copy-Item -Path $msixFiles.FullName -Destination $destPath -Force
