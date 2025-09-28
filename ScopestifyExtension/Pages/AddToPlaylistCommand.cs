@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
@@ -25,6 +26,26 @@ internal sealed partial class AddToPlaylistCommand(string playlistId, string nam
         );
 
         currentTrack = playback.Item as FullTrack;
+
+        // Check if track is already in the playlist
+        if (currentTrack == null)
+        {
+            throw new InvalidOperationException("No track currently playing");
+        }
+
+        var playlistTracksPage = await spotify.Playlists.GetItems(playlistId);
+        var playlistTracks = await spotify.PaginateAll(playlistTracksPage);
+        var alreadyInPlaylist = playlistTracks
+            .Where(t => t.Track.Type == ItemType.Track)
+            .Select(t => t.Track as FullTrack)
+            .Any(t => t?.Id == currentTrack?.Id);
+
+        if (alreadyInPlaylist)
+        {
+            throw new InvalidOperationException(
+                $"{Utils.TrackFullName(currentTrack)} is already in {name}"
+            );
+        }
 
         await spotify.Playlists.AddItems(
             playlistId,
