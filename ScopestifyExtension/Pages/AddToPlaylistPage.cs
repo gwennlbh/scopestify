@@ -27,56 +27,11 @@ internal sealed partial class AddToPlaylistPage : ListPage
     {
         return
         [
-            .. playlists.Select(playlist => new ListItem(
-                new AddToPlaylistCommand(playlist.Id ?? "", playlist.Name ?? "")
-            )
-            {
-                Title = playlist.Name ?? "Unnamed playlist",
-                Subtitle = string.Join(
-                    " • ",
-                    new string[]
-                    {
-                        playlist.Owner?.Id != currentUser?.Id
-                            ? $"By {playlist.Owner?.DisplayName}"
-                            : "",
-                        playlist.Tracks?.Total != null ? $"{playlist.Tracks.Total} tracks" : "",
-                    }.Where(s => !string.IsNullOrEmpty(s))
-                ),
-                Icon = new IconInfo(playlist.Images?.FirstOrDefault()?.Url ?? "\uF147"),
-                Details = new Details
-                {
-                    Title = playlist.Name ?? "Unnamed playlist",
-                    Body = playlist.Description ?? "No description",
-                    HeroImage = new IconInfo(playlist.Images?.FirstOrDefault()?.Url ?? "\uF147"),
-                    Metadata =
-                    [
-                        new DetailsElement
-                        {
-                            Key = "By",
-                            Data =
-                                playlist.Owner?.Id == currentUser?.Id
-                                    ? new DetailsLink("You")
-                                    : new DetailsLink(
-                                        playlist.Owner.ExternalUrls?["spotify"] ?? "",
-                                        playlist.Owner?.DisplayName ?? "Unknown"
-                                    ),
-                        },
-                        new DetailsElement
-                        {
-                            Key = "Tracks",
-                            Data = new DetailsLink(playlist.Tracks?.Total.ToString() ?? "?"),
-                        },
-                        new DetailsElement
-                        {
-                            Key = "Playlist ID",
-                            Data = new DetailsLink(
-                                playlist.ExternalUrls?["spotify"] ?? "",
-                                playlist.Id ?? "?"
-                            ),
-                        },
-                    ],
-                },
-            }),
+            .. playlists.Select(playlist => Utils.CreatePlaylistListItem(
+                playlist,
+                new AddToPlaylistCommand(playlist.Id ?? "", playlist.Name ?? ""),
+                currentUser
+            )),
         ];
     }
 
