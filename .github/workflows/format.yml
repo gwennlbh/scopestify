@@ -42,5 +42,5 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add .
-        git diff --staged --quiet || git commit -m "Auto-format code with CSharpier [skip ci]"
+        git diff --staged --quiet || git commit -m "🎨 Auto-format code with CSharpier [skip ci]"
         git push
