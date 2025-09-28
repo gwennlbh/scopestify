@@ -41,7 +41,7 @@ internal sealed partial class ConfigFormContent : FormContent
         },
         {
             "type": "TextBlock",
-            "text": "Set up a command to run automatically after liking a track on Spotify.",
+            "text": "Set up a command to run automatically after liking a track on Spotify. This could be used to log liked tracks, trigger notifications, or run custom scripts.",
             "wrap": true
         },
         {
@@ -49,7 +49,7 @@ internal sealed partial class ConfigFormContent : FormContent
             "label": "Post-like Hook Command",
             "style": "text",
             "id": "PostLikeHook",
-            "placeholder": "e.g., echo 'Liked: $TRACK_NAME'",
+            "placeholder": "e.g., echo 'Liked track!', powershell -Command 'Write-Host Track liked', or /usr/bin/logger 'Track liked'",
             "value": "{{{config.PostLikeHook}}}",
             "isMultiline": false
         },

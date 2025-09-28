@@ -53,11 +53,15 @@ internal sealed partial class LikeCurrentTrackCommand : InvokableCommand
             {
                 try
                 {
+                    var commandParts = config.PostLikeHook.Split(' ', 2);
+                    var fileName = commandParts[0];
+                    var arguments = commandParts.Length > 1 ? commandParts[1] : "";
+
                     System.Diagnostics.Process.Start(
                         new System.Diagnostics.ProcessStartInfo
                         {
-                            FileName = config.PostLikeHook.Split(' ', 2)[0],
-                            Arguments = config.PostLikeHook.Split(' ', 2)[1],
+                            FileName = fileName,
+                            Arguments = arguments,
                             WorkingDirectory = config.PostLikeHookCwd ?? "",
                             UseShellExecute = true,
                             CreateNoWindow = true,
