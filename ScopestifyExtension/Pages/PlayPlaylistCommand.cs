@@ -55,7 +55,7 @@ sealed partial class PlayPlaylistCommand(string uri, string name, bool? enqueue)
                 new ToastArgs
                 {
                     Message = enqueue ? $"Queuing {name}" : $"Playing {name}",
-                    Result = CommandResult.GoHome(),
+                    Result = CommandResult.Dismiss(),
                 }
             );
         }

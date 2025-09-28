@@ -45,7 +45,7 @@ sealed partial class PlayTrackCommand(
                 new ToastArgs
                 {
                     Message = enqueue ? $"Queuing {name}" : $"Playing {name}",
-                    Result = CommandResult.GoHome(),
+                    Result = CommandResult.Dismiss(),
                 }
             );
         }
