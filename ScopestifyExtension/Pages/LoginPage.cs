@@ -8,6 +8,7 @@ using SpotifyAPI.Web;
 internal sealed partial class LoginPage : ListPage
 {
     private PrivateUser? currentUser;
+    private Device? currentDevice;
 
     public LoginPage()
     {
@@ -31,7 +32,15 @@ internal sealed partial class LoginPage : ListPage
                 new ListItem(new NoOpCommand())
                 {
                     Title = $"Logged in as {currentUser.DisplayName}",
-                    Subtitle = $"User ID: {currentUser.Id}",
+                    Subtitle = string.Join(
+                        " • ",
+                        [
+                            currentDevice != null
+                                ? $"Currently playing on {currentDevice.Name}"
+                                : "No device currently active",
+                            $"User ID: {currentUser.Id}",
+                        ]
+                    ),
                     Icon = new IconInfo(currentUser?.Images.FirstOrDefault()?.Url ?? "\uE949"),
                 },
             ];
@@ -82,6 +91,8 @@ internal sealed partial class LoginPage : ListPage
         {
             var spotify = AuthenticatedSpotifyClient.Get();
             currentUser = await spotify.UserProfile.Current();
+            var devices = await spotify.Player.GetCurrentPlayback();
+            currentDevice = devices.Device;
         }
         catch (Exception)
         {
