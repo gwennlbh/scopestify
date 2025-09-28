@@ -2,6 +2,7 @@ namespace ScopestifyExtension;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
@@ -23,6 +24,9 @@ class AuthenticatedSpotifyClient
 
         if (tokenCreatedAt != null && tokenExpiresIn != null)
         {
+            Debug.WriteLine(
+                $"Token created at {tokenCreatedAt} expires in {tokenExpiresIn} seconds"
+            );
             return new SpotifyClient(
                 SpotifyClientConfig
                     .CreateDefault()
@@ -44,6 +48,9 @@ class AuthenticatedSpotifyClient
             );
         }
 
+        Debug.WriteLine(
+            $"Invalid refresh token params, expires_in={tokenExpiresIn}, created_at={tokenCreatedAt}"
+        );
         return new SpotifyClient(config.AccessToken);
     }
 
