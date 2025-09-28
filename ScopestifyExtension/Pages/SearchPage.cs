@@ -27,6 +27,8 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
     private SimpleAlbum[] albums = [];
     private string errorMessage = "";
 
+    private bool labelItemTypes = true;
+
     public SearchPage()
     {
         Name = "Search on Spotify";
@@ -91,6 +93,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                     [Utils.Artists(track), track.Album?.Name ?? "No album"]
                 ),
                 Icon = new IconInfo(track.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F"),
+                Tags = labelItemTypes ? [new Tag("Track") { Icon = new IconInfo("\uEC4F") }] : [],
                 MoreCommands =
                 [
                     new CommandContextItem(
@@ -155,6 +158,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                 Title = album.Name ?? "Unnamed album",
                 Subtitle = Utils.Artists(new FullTrack { Artists = album.Artists }),
                 Icon = new IconInfo(album.Images?.FirstOrDefault()?.Url ?? "\uE7C3"),
+                Tags = labelItemTypes ? [new Tag("Album") { Icon = new IconInfo("\uE93C") }] : [],
                 MoreCommands =
                 [
                     new CommandContextItem(
@@ -224,6 +228,9 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                         }.Where(s => !string.IsNullOrEmpty(s))
                     ),
                     Icon = new IconInfo(playlist?.Images?.FirstOrDefault()?.Url ?? "\uF147"),
+                    Tags = labelItemTypes
+                        ? [new Tag("Playlist") { Icon = new IconInfo("\uE90B") }]
+                        : [],
                     MoreCommands =
                     [
                         new CommandContextItem(new OpenUrlCommand(playlist.Uri ?? ""))
@@ -240,6 +247,13 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                         {
                             Title = "Add to queue",
                             Icon = new IconInfo("\uE710"),
+                        },
+                        new CommandContextItem(
+                            new AddToPlaylistCommand(playlist?.Id ?? "", playlist?.Name ?? "")
+                        )
+                        {
+                            Title = "Add current track",
+                            Icon = new IconInfo("\uE8B5"),
                         },
                     ],
                     Details = new Details
@@ -341,9 +355,15 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
             var OnlyTracks = query.StartsWith("t:");
             var OnlyAlbums = query.StartsWith("a:");
             var OnlyPlaylists = query.StartsWith("p:");
+
             if (OnlyTracks || OnlyAlbums || OnlyPlaylists)
             {
-                query = query.Substring(2).Trim();
+                query = query[2..].Trim();
+                labelItemTypes = false;
+            }
+            else
+            {
+                labelItemTypes = true;
             }
 
             var EnableTracksSearch = !OnlyAlbums && !OnlyPlaylists;
