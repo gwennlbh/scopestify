@@ -17,7 +17,34 @@ class AuthenticatedSpotifyClient
 
     public static SpotifyClient Get()
     {
-        return new SpotifyClient(new ConfigurationFile().AccessToken);
+        var config = new ConfigurationFile();
+        var tokenCreatedAt = config.TokenCreatedAt;
+        var tokenExpiresIn = config.TokenExpiresIn;
+
+        if (tokenCreatedAt != null && tokenExpiresIn != null)
+        {
+            return new SpotifyClient(
+                SpotifyClientConfig
+                    .CreateDefault()
+                    .WithAuthenticator(
+                        new AuthorizationCodeAuthenticator(
+                            config.ClientId,
+                            config.ClientSecret,
+                            new AuthorizationCodeTokenResponse
+                            {
+                                AccessToken = config.AccessToken,
+                                RefreshToken = config.RefreshToken,
+                                Scope = config.TokenScopes,
+                                TokenType = config.TokenType,
+                                ExpiresIn = tokenExpiresIn ?? 0,
+                                CreatedAt = tokenCreatedAt ?? DateTime.Now,
+                            }
+                        )
+                    )
+            );
+        }
+
+        return new SpotifyClient(config.AccessToken);
     }
 
     public static void LogOut()
@@ -90,9 +117,24 @@ class AuthenticatedSpotifyClient
         );
 
         config.AccessToken = tokenResponse.AccessToken;
+        config.RefreshToken = tokenResponse.RefreshToken;
+        config.TokenScopes = tokenResponse.Scope;
+        config.TokenType = tokenResponse.TokenType;
+        config.TokenExpiresIn = tokenResponse.ExpiresIn;
+        config.TokenCreatedAt = tokenResponse.CreatedAt;
         config.Save();
 
-        var spotify = new SpotifyClient(tokenResponse.AccessToken);
+        var spotify = new SpotifyClient(
+            SpotifyClientConfig
+                .CreateDefault()
+                .WithAuthenticator(
+                    new AuthorizationCodeAuthenticator(
+                        config.ClientId,
+                        config.ClientSecret,
+                        tokenResponse
+                    )
+                )
+        );
         user = await spotify.UserProfile.Current();
     }
 

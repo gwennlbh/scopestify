@@ -9,7 +9,11 @@ public class ConfigurationFile
     public string ClientId { get; set; } = "";
     public string ClientSecret { get; set; } = "";
     public string AccessToken { get; set; } = "";
-    public string Scopes { get; set; } = "";
+    public string RefreshToken { get; set; } = "";
+    public string TokenScopes { get; set; } = "";
+    public string TokenType { get; set; } = "";
+    public int? TokenExpiresIn { get; set; }
+    public DateTime? TokenCreatedAt { get; set; }
     public string PostLikeHook { get; set; } = "";
     public string PostLikeHookCwd { get; set; } = "";
 
@@ -39,9 +43,19 @@ public class ConfigurationFile
         ClientId = config["client_id"] ?? "";
         ClientSecret = config["client_secret"] ?? "";
         AccessToken = config["access_token"] ?? "";
-        Scopes = config["scopes"] ?? "";
         PostLikeHook = config["post_like_hook"] ?? "";
         PostLikeHookCwd = config["post_like_hook_cwd"] ?? "";
+        RefreshToken = config["refresh_token"] ?? "";
+        TokenScopes = config["token_scopes"] ?? "";
+        TokenType = config["token_type"] ?? "";
+        if (int.TryParse(config["token_expires_in"], out var expiresIn))
+        {
+            TokenExpiresIn = expiresIn;
+        }
+        if (DateTime.TryParse(config["token_created_at"], out var createdAt))
+        {
+            TokenCreatedAt = createdAt;
+        }
     }
 
     public void Save()
@@ -61,8 +75,13 @@ public class ConfigurationFile
             ["client_id"] = ClientId,
             ["client_secret"] = ClientSecret,
             ["access_token"] = AccessToken,
-            ["scopes"] = Scopes,
             ["post_like_hook"] = PostLikeHook,
+            ["post_like_hook_cwd"] = PostLikeHookCwd,
+            ["refresh_token"] = RefreshToken,
+            ["token_scopes"] = TokenScopes,
+            ["token_type"] = TokenType,
+            ["token_expires_in"] = TokenExpiresIn?.ToString() ?? "",
+            ["token_created_at"] = TokenCreatedAt?.ToString("o") ?? "",
         };
 
         System.IO.File.WriteAllText(Path(), System.Text.Json.JsonSerializer.Serialize(toWrite));
