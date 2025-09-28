@@ -46,7 +46,7 @@ internal sealed partial class AddToPlaylistCommand : InvokableCommand
         {
             Task.Run(Run).Wait();
             return CommandResult.ShowToast(
-                new ToastArgs { Message = $"Added {currentTrack?.Name ?? "?"}" }
+                new ToastArgs { Message = $"Added {Utils.TrackFullName(currentTrack)}" }
             );
         }
         catch (Exception ex)

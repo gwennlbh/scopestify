@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
@@ -44,8 +45,34 @@ internal sealed partial class LikeCurrentTrackCommand : InvokableCommand
         try
         {
             Task.Run(Run).Wait();
+
+            var config = new ConfigurationFile();
+            if (config.PostLikeHook != "")
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(
+                        new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = config.PostLikeHook,
+                            UseShellExecute = true,
+                        }
+                    );
+                }
+                catch (Exception ex)
+                {
+                    return CommandResult.ShowToast(
+                        new ToastArgs
+                        {
+                            Message =
+                                $"Liked {Utils.TrackFullName(currentTrack)}, but failed to run post-like hook: {ex.Message}",
+                        }
+                    );
+                }
+            }
+
             return CommandResult.ShowToast(
-                new ToastArgs { Message = $"Liked {currentTrack?.Name ?? "?"}" }
+                new ToastArgs { Message = $"Liked {Utils.TrackFullName(currentTrack)}" }
             );
         }
         catch (Exception ex)

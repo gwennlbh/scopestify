@@ -11,6 +11,7 @@ internal sealed partial class AddToPlaylistPage : ListPage
     private SpotifyClient spotify = AuthenticatedSpotifyClient.Get();
 
     private FullPlaylist[] playlists = [];
+    private PrivateUser? currentUser;
 
     public AddToPlaylistPage()
     {
@@ -18,7 +19,7 @@ internal sealed partial class AddToPlaylistPage : ListPage
         Title = "Add current track to playlist";
         Name = "Add to playlist";
 
-        Task.Run(GetPlaylists).Wait();
+        Task.Run(LoadData).Wait();
     }
 
     public override ListItem[] GetItems()
@@ -29,14 +30,24 @@ internal sealed partial class AddToPlaylistPage : ListPage
                 new AddToPlaylistCommand(playlist.Id ?? "")
             )
             {
-                Title = playlist.Name ?? "Unknown playlist",
-                Subtitle = playlist.Description ?? "",
+                Title = playlist.Name ?? "Unnamed playlist",
+                Subtitle = string.Join(
+                    " • ",
+                    new string[]
+                    {
+                        playlist.Owner?.Id != currentUser?.Id
+                            ? $"By {playlist.Owner?.DisplayName}"
+                            : "",
+                        playlist.Description ?? "",
+                        playlist.Tracks?.Total != null ? $"{playlist.Tracks.Total} tracks" : "",
+                    }.Where(s => !string.IsNullOrEmpty(s))
+                ),
                 Icon = new IconInfo(playlist.Images?.FirstOrDefault()?.Url ?? "\uF147"),
             }),
         ];
     }
 
-    private async Task GetPlaylists()
+    private async Task LoadData()
     {
         try
         {
@@ -47,6 +58,14 @@ internal sealed partial class AddToPlaylistPage : ListPage
         catch (Exception ex)
         {
             playlists = [new FullPlaylist { Name = "Error fetching playlists", Id = ex.Message }];
+        }
+
+        try
+        {
+            currentUser = await spotify.UserProfile.Current();
+        }
+        catch (Exception)
+        { /* ignore */
         }
     }
 }
