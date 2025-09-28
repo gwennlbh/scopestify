@@ -21,6 +21,7 @@ public partial class ScopestifyExtensionCommandsProvider : CommandProvider
             new CommandItem(new LikeCurrentTrackCommand()) { Title = "Like current track" },
             new CommandItem(new SearchPage()) { Title = "Search on Spotify" },
             new CommandItem(new LoginPage()) { Title = "Authenticate with Spotify" },
+            new CommandItem(new ConfigPage()) { Title = "Configuration" },
         ];
     }
 

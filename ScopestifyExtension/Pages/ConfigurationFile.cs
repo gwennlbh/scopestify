@@ -63,6 +63,7 @@ public class ConfigurationFile
             ["access_token"] = AccessToken,
             ["scopes"] = Scopes,
             ["post_like_hook"] = PostLikeHook,
+            ["post_like_hook_cwd"] = PostLikeHookCwd,
         };
 
         System.IO.File.WriteAllText(Path(), System.Text.Json.JsonSerializer.Serialize(toWrite));
