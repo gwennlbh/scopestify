@@ -10,7 +10,6 @@ internal sealed partial class AddToPlaylistPage : ListPage
 {
     private SpotifyClient spotify = AuthenticatedSpotifyClient.Get();
 
-    private Paging<FullPlaylist>? playlistsPage;
     private FullPlaylist[] playlists = [];
     private PrivateUser? currentUser;
 
@@ -25,8 +24,6 @@ internal sealed partial class AddToPlaylistPage : ListPage
 
     public override ListItem[] GetItems()
     {
-        HasMoreItems = playlistsPage?.Next != null;
-
         return
         [
             .. playlists.Select(playlist => new ListItem(
@@ -54,8 +51,9 @@ internal sealed partial class AddToPlaylistPage : ListPage
     {
         try
         {
-            playlistsPage = await spotify.Playlists.CurrentUsers();
-            playlists = [.. playlistsPage.Items ?? []];
+            var playlistsFirstPage = await spotify.Playlists.CurrentUsers();
+            var allPlaylists = await spotify.PaginateAll(playlistsFirstPage);
+            playlists = [.. allPlaylists];
         }
         catch (Exception ex)
         {
@@ -69,19 +67,5 @@ internal sealed partial class AddToPlaylistPage : ListPage
         catch (Exception)
         { /* ignore */
         }
-    }
-
-    public override void LoadMore()
-    {
-        Task.Run(async () =>
-            {
-                if (playlistsPage?.Next != null)
-                {
-                    playlistsPage = await spotify.NextPage(playlistsPage);
-                    playlists = [.. playlists, .. playlistsPage.Items ?? []];
-                    RaiseItemsChanged(playlists.Length);
-                }
-            })
-            .Wait();
     }
 }
