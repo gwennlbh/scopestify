@@ -1,0 +1,11 @@
+# Ignore non-C# files
+*.xml
+*.config
+*.props
+*.targets
+*.json
+*.yml
+*.yaml
+*.md
+*.txt
+*.manifest
