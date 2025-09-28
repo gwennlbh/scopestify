@@ -14,24 +14,37 @@ internal sealed partial class LoginPage : ListPage
         Name = "Authenticate to Spotify";
         Icon = new("\uE8D7");
 
-
         Task.Run(GetCurrentUser).Wait();
     }
 
     public override ListItem[] GetItems()
     {
-        return [
-            new ListItem(new LoginCommand()) { Title = "Login to Spotify", Subtitle = "after having registered your App's credentials" },
-            new ListItem(new RegisterAppFormPage()) {
+        return
+        [
+            currentUser == null
+                ? new ListItem(new LoginCommand())
+                {
+                    Title = "Login to Spotify",
+                    Subtitle = "After having registered your App's credentials",
+                }
+                : new ListItem(new LogoutCommand())
+                {
+                    Title = "Logout from Spotify",
+                    Subtitle = "Clear the stored credentials",
+                },
+            new ListItem(new RegisterAppFormPage())
+            {
                 Title = "Register your App",
-Subtitle = $"Secrets are stored at {AuthenticatedSpotifyClient.SecretsPath()}"
+                Subtitle = $"Secrets are stored at {AuthenticatedSpotifyClient.SecretsPath()}",
             },
-            new ListItem(new NoOpCommand()) {
-                Title = currentUser != null ? $"Logged in as {currentUser.DisplayName}" : "Not logged in",
+            new ListItem(new NoOpCommand())
+            {
+                Title =
+                    currentUser != null
+                        ? $"Logged in as {currentUser.DisplayName}"
+                        : "Not logged in",
                 Subtitle = currentUser != null ? $"User ID: {currentUser.Id}" : "",
-                Icon = new IconInfo(
-                    currentUser?.Images.FirstOrDefault()?.Url ?? "\uE949"
-                ),
+                Icon = new IconInfo(currentUser?.Images.FirstOrDefault()?.Url ?? "\uE949"),
             },
         ];
     }
