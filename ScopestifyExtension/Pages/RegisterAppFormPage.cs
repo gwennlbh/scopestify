@@ -22,7 +22,6 @@ internal sealed partial class RegisterAppFormPage : ContentPage
 
 internal sealed partial class RegisterAppFormContent : FormContent
 {
-
     public RegisterAppFormContent()
     {
         TemplateJson = $$"""
@@ -45,7 +44,8 @@ internal sealed partial class RegisterAppFormContent : FormContent
         {
             "type": "TextBlock",
             "text": "Be sure to add {{AuthenticatedSpotifyClient.callbackUri}} as an authorized Redirect URI!",
-            "wrap": true
+            "wrap": true,
+            "color": "attention"
         },
         {
             "type": "Action.OpenUrl",
@@ -82,9 +82,7 @@ internal sealed partial class RegisterAppFormContent : FormContent
     ]
 }
 """;
-
     }
-
 
     private static PrivateUser? user;
     private static string errorMessage = "";
@@ -105,24 +103,31 @@ internal sealed partial class RegisterAppFormContent : FormContent
             ["access_token"] = "",
         };
 
-        System.IO.File.WriteAllText(AuthenticatedSpotifyClient.SecretsPath(), newSecrets.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+        System.IO.File.WriteAllText(
+            AuthenticatedSpotifyClient.SecretsPath(),
+            newSecrets.ToJsonString(
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true }
+            )
+        );
 
         Task.Run(LogIn).Wait();
 
-
         if (user != null)
         {
-            return CommandResult.ShowToast(new ToastArgs { Message = $"Logged in as {user.DisplayName}" });
+            return CommandResult.ShowToast(
+                new ToastArgs { Message = $"Logged in as {user.DisplayName}" }
+            );
         }
         else
         {
-            return CommandResult.ShowToast(new ToastArgs { Message = $"Login failed: {errorMessage}" });
+            return CommandResult.ShowToast(
+                new ToastArgs { Message = $"Login failed: {errorMessage}" }
+            );
         }
     }
 
-    private async static Task LogIn()
+    private static async Task LogIn()
     {
         (user, errorMessage) = await AuthenticatedSpotifyClient.LogIn();
     }
-
 }

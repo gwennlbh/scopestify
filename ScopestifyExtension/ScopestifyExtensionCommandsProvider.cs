@@ -15,7 +15,8 @@ public partial class ScopestifyExtensionCommandsProvider : CommandProvider
     {
         DisplayName = "Scopestify";
         Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png");
-        _commands = [
+        _commands =
+        [
             new CommandItem(new AddToPlaylistPage()) { Title = "Add current track to playlist..." },
             new CommandItem(new LikeCurrentTrackCommand()) { Title = "Like current track" },
             new CommandItem(new LoginPage()) { Title = "Authenticate with Spotify" },
@@ -26,5 +27,4 @@ public partial class ScopestifyExtensionCommandsProvider : CommandProvider
     {
         return _commands;
     }
-
 }

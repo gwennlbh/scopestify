@@ -8,7 +8,6 @@ namespace ScopestifyExtension;
 
 internal sealed partial class LoginCommand : InvokableCommand
 {
-
     public override string Name => "Login to Spotify";
     public override IconInfo Icon => new("\uE8D7");
 
@@ -25,16 +24,19 @@ internal sealed partial class LoginCommand : InvokableCommand
 
             if (user != null)
             {
-                return CommandResult.ShowToast(new ToastArgs { Message = $"Logged in as {user.DisplayName}" });
+                return CommandResult.ShowToast(
+                    new ToastArgs { Message = $"Logged in as {user.DisplayName}" }
+                );
             }
             else
             {
-                return CommandResult.ShowToast(new ToastArgs { Message = $"Login failed: {errorMessage}" });
+                return CommandResult.ShowToast(
+                    new ToastArgs { Message = $"Login failed: {errorMessage}" }
+                );
             }
         }
         catch (Exception ex)
         {
-
             return CommandResult.ShowToast(new ToastArgs { Message = ex.Message });
         }
     }
@@ -43,5 +45,4 @@ internal sealed partial class LoginCommand : InvokableCommand
     {
         (user, errorMessage) = await AuthenticatedSpotifyClient.LogIn();
     }
-
 }

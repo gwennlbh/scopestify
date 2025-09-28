@@ -29,9 +29,15 @@ internal sealed partial class AddToPlaylistCommand : InvokableCommand
 
         currentTrack = playback.Item as FullTrack;
 
-        await spotify.Playlists.AddItems(playlistId, new PlaylistAddItemsRequest([
-            currentTrack?.Uri ?? throw new InvalidOperationException("No track currently playing")
-        ]));
+        await spotify.Playlists.AddItems(
+            playlistId,
+            new PlaylistAddItemsRequest(
+                [
+                    currentTrack?.Uri
+                        ?? throw new InvalidOperationException("No track currently playing"),
+                ]
+            )
+        );
     }
 
     public override CommandResult Invoke()
@@ -39,11 +45,12 @@ internal sealed partial class AddToPlaylistCommand : InvokableCommand
         try
         {
             Task.Run(Run).Wait();
-            return CommandResult.ShowToast(new ToastArgs { Message = $"Added {currentTrack?.Name ?? "?"}" });
+            return CommandResult.ShowToast(
+                new ToastArgs { Message = $"Added {currentTrack?.Name ?? "?"}" }
+            );
         }
         catch (Exception ex)
         {
-
             return CommandResult.ShowToast(new ToastArgs { Message = ex.Message });
         }
     }

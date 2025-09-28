@@ -27,7 +27,9 @@ internal sealed partial class LikeCurrentTrackCommand : InvokableCommand
             throw new InvalidOperationException("No track currently playing");
         }
 
-        var savedTracks = await spotify.Library.CheckTracks(new LibraryCheckTracksRequest([currentTrack.Id ?? ""]));
+        var savedTracks = await spotify.Library.CheckTracks(
+            new LibraryCheckTracksRequest([currentTrack.Id ?? ""])
+        );
 
         if (savedTracks.Count > 0 && savedTracks[0])
         {
@@ -42,11 +44,12 @@ internal sealed partial class LikeCurrentTrackCommand : InvokableCommand
         try
         {
             Task.Run(Run).Wait();
-            return CommandResult.ShowToast(new ToastArgs { Message = $"Liked {currentTrack?.Name ?? "?"}" });
+            return CommandResult.ShowToast(
+                new ToastArgs { Message = $"Liked {currentTrack?.Name ?? "?"}" }
+            );
         }
         catch (Exception ex)
         {
-
             return CommandResult.ShowToast(new ToastArgs { Message = ex.Message });
         }
     }
