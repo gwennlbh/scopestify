@@ -74,9 +74,33 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
         [
             .. tracks.Select(track => Utils.CreateTrackListItem(
                 track, 
-                new PlayTrackCommand(track.Uri, Utils.TrackFullName(track))
+                new PlayTrackCommand(track.Uri, Utils.TrackFullName(track)),
+                [
+                    new CommandContextItem(
+                        new PlayTrackCommand(track.Uri, Utils.TrackFullName(track), enqueue: true)
+                    )
+                    {
+                        Title = "Add to queue",
+                        Icon = new IconInfo("\uE710"),
+                    },
+                ]
             )),
-            .. albums.Select(Utils.CreateAlbumListItem),
+            .. albums.Select(album => Utils.CreateAlbumListItem(
+                album,
+                [
+                    new CommandContextItem(
+                        new PlayAlbumCommand(
+                            album.Uri,
+                            album.Name ?? "Unnamed album",
+                            enqueue: true
+                        )
+                    )
+                    {
+                        Title = "Add to queue",
+                        Icon = new IconInfo("\uE710"),
+                    },
+                ]
+            )),
             .. playlists
                 .Where(playlist => playlist != null)
                 .Where(playlist => playlist.Tracks?.Total > 0)

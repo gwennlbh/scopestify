@@ -27,7 +27,7 @@ public class Utils
         return $"{Artists(track)} – {track.Name}";
     }
 
-    public static ListItem CreateTrackListItem(FullTrack track, InvokableCommand primaryCommand, CommandContextItem[]? moreCommands = null)
+    public static ListItem CreateTrackListItem(FullTrack track, InvokableCommand primaryCommand, CommandContextItem[] moreCommands)
     {
         return new ListItem(primaryCommand)
         {
@@ -37,16 +37,7 @@ public class Utils
                 [Artists(track), track.Album?.Name ?? "No album"]
             ),
             Icon = new IconInfo(track.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F"),
-            MoreCommands = moreCommands ?? 
-            [
-                new CommandContextItem(
-                    new PlayTrackCommand(track.Uri, TrackFullName(track), enqueue: true)
-                )
-                {
-                    Title = "Add to queue",
-                    Icon = new IconInfo("\uE710"),
-                },
-            ],
+            MoreCommands = moreCommands,
             Details = new Details
             {
                 HeroImage = new IconInfo(
@@ -87,7 +78,7 @@ public class Utils
         };
     }
 
-    public static ListItem CreateAlbumListItem(SimpleAlbum album, CommandContextItem[]? moreCommands = null)
+    public static ListItem CreateAlbumListItem(SimpleAlbum album, CommandContextItem[] moreCommands)
     {
         return new ListItem(
             new PlayAlbumCommand(album.Uri, album.Name ?? "Unnamed album", enqueue: false)
@@ -96,20 +87,7 @@ public class Utils
             Title = album.Name ?? "Unnamed album",
             Subtitle = Artists(new FullTrack { Artists = album.Artists }),
             Icon = new IconInfo(album.Images?.FirstOrDefault()?.Url ?? "\uE7C3"),
-            MoreCommands = moreCommands ??
-            [
-                new CommandContextItem(
-                    new PlayAlbumCommand(
-                        album.Uri,
-                        album.Name ?? "Unnamed album",
-                        enqueue: true
-                    )
-                )
-                {
-                    Title = "Add to queue",
-                    Icon = new IconInfo("\uE710"),
-                },
-            ],
+            MoreCommands = moreCommands,
             Details = new Details
             {
                 Title = album.Name ?? "Unnamed album",
@@ -140,7 +118,7 @@ public class Utils
         };
     }
 
-    public static ListItem CreatePlaylistListItem(FullPlaylist playlist, InvokableCommand primaryCommand, PrivateUser? currentUser, CommandContextItem[]? moreCommands = null)
+    public static ListItem CreatePlaylistListItem(FullPlaylist playlist, InvokableCommand primaryCommand, PrivateUser? currentUser, CommandContextItem[]? moreCommands)
     {
         return new ListItem(primaryCommand)
         {

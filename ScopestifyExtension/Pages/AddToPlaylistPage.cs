@@ -30,7 +30,8 @@ internal sealed partial class AddToPlaylistPage : ListPage
             .. playlists.Select(playlist => Utils.CreatePlaylistListItem(
                 playlist,
                 new AddToPlaylistCommand(playlist.Id ?? "", playlist.Name ?? ""),
-                currentUser
+                currentUser,
+                null
             )),
         ];
     }
