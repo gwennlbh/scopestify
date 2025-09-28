@@ -6,31 +6,50 @@ using SpotifyAPI.Web;
 
 namespace ScopestifyExtension;
 
-internal sealed partial class AddToPlaylistCommand(string playlistId, string name)
-    : InvokableCommand
+/// <summary>
+/// Add the currently playing track to the specified playlist
+/// </summary>
+/// <param name="playlistId"></param>
+/// <param name="name"></param>
+/// <param name="trackId">If not specified, defaults to the currently playing track</param>
+internal sealed partial class AddToPlaylistCommand(
+    string playlistId,
+    string name,
+    string? trackId = null
+) : InvokableCommand
 {
-    public override string Name => "Add to playlist";
+    public override string Name => "Add current track";
     public override IconInfo Icon => new("\uF147");
-
-    private readonly SpotifyClient spotify = AuthenticatedSpotifyClient.Get();
 
     private string playlistId = playlistId;
     private string name = name;
 
-    private FullTrack? currentTrack;
+    private string? trackId = trackId;
+
+    private FullTrack? trackToAdd;
 
     private async Task Run()
     {
-        var playback = await spotify.Player.GetCurrentlyPlaying(
-            new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track)
-        );
+        var spotify = AuthenticatedSpotifyClient.Get();
 
-        currentTrack = playback.Item as FullTrack;
-
-        // Check if track is already in the playlist
-        if (currentTrack == null)
+        if (trackId != null)
         {
-            throw new InvalidOperationException("No track currently playing");
+            trackToAdd = await spotify.Tracks.Get(trackId);
+        }
+        else
+        {
+            var playback = await spotify.Player.GetCurrentlyPlaying(
+                new PlayerCurrentlyPlayingRequest(
+                    PlayerCurrentlyPlayingRequest.AdditionalTypes.Track
+                )
+            );
+
+            trackToAdd = playback.Item as FullTrack;
+            // Check if track is already in the playlist
+            if (trackToAdd == null)
+            {
+                throw new InvalidOperationException("No track currently playing");
+            }
         }
 
         var playlistTracksPage = await spotify.Playlists.GetItems(playlistId);
@@ -38,12 +57,12 @@ internal sealed partial class AddToPlaylistCommand(string playlistId, string nam
         var alreadyInPlaylist = playlistTracks
             .Where(t => t.Track.Type == ItemType.Track)
             .Select(t => t.Track as FullTrack)
-            .Any(t => t?.Id == currentTrack?.Id);
+            .Any(t => t?.Id == trackToAdd?.Id);
 
         if (alreadyInPlaylist)
         {
             throw new InvalidOperationException(
-                $"{Utils.TrackFullName(currentTrack)} is already in {name}"
+                $"{Utils.TrackFullName(trackToAdd)} is already in {name}"
             );
         }
 
@@ -51,7 +70,7 @@ internal sealed partial class AddToPlaylistCommand(string playlistId, string nam
             playlistId,
             new PlaylistAddItemsRequest(
                 [
-                    currentTrack?.Uri
+                    trackToAdd?.Uri
                         ?? throw new InvalidOperationException("No track currently playing"),
                 ]
             )
@@ -64,7 +83,7 @@ internal sealed partial class AddToPlaylistCommand(string playlistId, string nam
         {
             Task.Run(Run).Wait();
             return CommandResult.ShowToast(
-                new ToastArgs { Message = $"Added {Utils.TrackFullName(currentTrack)} to {name}" }
+                new ToastArgs { Message = $"Added {Utils.TrackFullName(trackToAdd)} to {name}" }
             );
         }
         catch (Exception ex)
