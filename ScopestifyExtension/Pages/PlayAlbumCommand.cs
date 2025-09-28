@@ -45,7 +45,11 @@ sealed partial class PlayAlbumCommand(string uri, string name, bool? enqueue) : 
         {
             Task.Run(Run).Wait();
             return CommandResult.ShowToast(
-                new ToastArgs { Message = enqueue ? $"Queuing {name}" : $"Playing {name}" }
+                new ToastArgs
+                {
+                    Message = enqueue ? $"Queuing {name}" : $"Playing {name}",
+                    Result = CommandResult.GoHome(),
+                }
             );
         }
         catch (Exception ex)
