@@ -27,7 +27,7 @@ public class Utils
         return $"{Artists(track)} – {track.Name}";
     }
 
-    public static ListItem CreateTrackListItem(FullTrack track, InvokableCommand primaryCommand)
+    public static ListItem CreateTrackListItem(FullTrack track, InvokableCommand primaryCommand, CommandContextItem[]? moreCommands = null)
     {
         return new ListItem(primaryCommand)
         {
@@ -37,7 +37,7 @@ public class Utils
                 [Artists(track), track.Album?.Name ?? "No album"]
             ),
             Icon = new IconInfo(track.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F"),
-            MoreCommands =
+            MoreCommands = moreCommands ?? 
             [
                 new CommandContextItem(
                     new PlayTrackCommand(track.Uri, TrackFullName(track), enqueue: true)
@@ -87,7 +87,7 @@ public class Utils
         };
     }
 
-    public static ListItem CreateAlbumListItem(SimpleAlbum album)
+    public static ListItem CreateAlbumListItem(SimpleAlbum album, CommandContextItem[]? moreCommands = null)
     {
         return new ListItem(
             new PlayAlbumCommand(album.Uri, album.Name ?? "Unnamed album", enqueue: false)
@@ -96,7 +96,7 @@ public class Utils
             Title = album.Name ?? "Unnamed album",
             Subtitle = Artists(new FullTrack { Artists = album.Artists }),
             Icon = new IconInfo(album.Images?.FirstOrDefault()?.Url ?? "\uE7C3"),
-            MoreCommands =
+            MoreCommands = moreCommands ??
             [
                 new CommandContextItem(
                     new PlayAlbumCommand(
@@ -140,7 +140,7 @@ public class Utils
         };
     }
 
-    public static ListItem CreatePlaylistListItem(FullPlaylist playlist, InvokableCommand primaryCommand, PrivateUser? currentUser)
+    public static ListItem CreatePlaylistListItem(FullPlaylist playlist, InvokableCommand primaryCommand, PrivateUser? currentUser, CommandContextItem[]? moreCommands = null)
     {
         return new ListItem(primaryCommand)
         {
@@ -156,6 +156,7 @@ public class Utils
                 }.Where(s => !string.IsNullOrEmpty(s))
             ),
             Icon = new IconInfo(playlist.Images?.FirstOrDefault()?.Url ?? "\uF147"),
+            MoreCommands = moreCommands,
             Details = new Details
             {
                 Title = playlist.Name ?? "Unnamed playlist",
@@ -185,83 +186,6 @@ public class Utils
                         Data = new DetailsLink(
                             playlist.ExternalUrls?["spotify"] ?? "",
                             playlist.Id ?? "?"
-                        ),
-                    },
-                ],
-            },
-        };
-    }
-
-    public static ListItem CreatePlaylistListItemWithMoreCommands(FullPlaylist playlist, PrivateUser? currentUser)
-    {
-        return new ListItem(
-            new PlayPlaylistCommand(
-                playlist?.Uri ?? "",
-                playlist?.Name ?? "",
-                enqueue: false
-            )
-        )
-        {
-            Title = playlist?.Name ?? "Unnamed playlist",
-            Subtitle = string.Join(
-                " • ",
-                new string[]
-                {
-                    playlist?.Owner?.Id == currentUser?.Id ? "Your playlist"
-                    : playlist?.Owner?.Id != null
-                        ? $"Playlist by {playlist?.Owner?.DisplayName}"
-                    : "",
-                    playlist?.Tracks?.Total != null
-                        ? $"{playlist?.Tracks.Total} tracks"
-                        : "",
-                }.Where(s => !string.IsNullOrEmpty(s))
-            ),
-            Icon = new IconInfo(playlist?.Images?.FirstOrDefault()?.Url ?? "\uF147"),
-            MoreCommands =
-            [
-                new CommandContextItem(
-                    new PlayPlaylistCommand(
-                        playlist?.Uri ?? "",
-                        playlist?.Name ?? "",
-                        enqueue: true
-                    )
-                )
-                {
-                    Title = "Add to queue",
-                    Icon = new IconInfo("\uE710"),
-                },
-            ],
-            Details = new Details
-            {
-                Title = playlist?.Name ?? "Unnamed playlist",
-                Body = playlist?.Description ?? "No description",
-                HeroImage = new IconInfo(
-                    playlist?.Images?.FirstOrDefault()?.Url ?? "\uF147"
-                ),
-                Metadata =
-                [
-                    new DetailsElement
-                    {
-                        Key = "By",
-                        Data =
-                            playlist?.Owner?.Id == currentUser?.Id
-                                ? new DetailsLink("You")
-                                : new DetailsLink(
-                                    playlist?.Owner?.ExternalUrls?["spotify"] ?? "",
-                                    playlist?.Owner?.DisplayName ?? "Unknown"
-                                ),
-                    },
-                    new DetailsElement
-                    {
-                        Key = "Tracks",
-                        Data = new DetailsLink(playlist?.Tracks?.Total.ToString() ?? "?"),
-                    },
-                    new DetailsElement
-                    {
-                        Key = "Playlist ID",
-                        Data = new DetailsLink(
-                            playlist?.ExternalUrls?["spotify"] ?? "",
-                            playlist?.Id ?? "?"
                         ),
                     },
                 ],

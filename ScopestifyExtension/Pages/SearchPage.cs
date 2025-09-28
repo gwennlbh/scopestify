@@ -80,7 +80,28 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
             .. playlists
                 .Where(playlist => playlist != null)
                 .Where(playlist => playlist.Tracks?.Total > 0)
-                .Select(playlist => Utils.CreatePlaylistListItemWithMoreCommands(playlist, currentUser)),
+                .Select(playlist => Utils.CreatePlaylistListItem(
+                    playlist,
+                    new PlayPlaylistCommand(
+                        playlist?.Uri ?? "",
+                        playlist?.Name ?? "",
+                        enqueue: false
+                    ),
+                    currentUser,
+                    [
+                        new CommandContextItem(
+                            new PlayPlaylistCommand(
+                                playlist?.Uri ?? "",
+                                playlist?.Name ?? "",
+                                enqueue: true
+                            )
+                        )
+                        {
+                            Title = "Add to queue",
+                            Icon = new IconInfo("\uE710"),
+                        },
+                    ]
+                )),
         ];
 
         // Sort by closest match to start of string
