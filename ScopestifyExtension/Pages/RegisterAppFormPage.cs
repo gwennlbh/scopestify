@@ -96,19 +96,11 @@ internal sealed partial class RegisterAppFormContent : FormContent
             return CommandResult.GoHome();
         }
 
-        var newSecrets = new JsonObject
+        new ConfigurationFile
         {
-            ["client_id"] = formInput["ClientId"]?.ToString() ?? "",
-            ["client_secret"] = formInput["ClientSecret"]?.ToString() ?? "",
-            ["access_token"] = "",
-        };
-
-        System.IO.File.WriteAllText(
-            AuthenticatedSpotifyClient.SecretsPath(),
-            newSecrets.ToJsonString(
-                new System.Text.Json.JsonSerializerOptions { WriteIndented = true }
-            )
-        );
+            ClientId = formInput["ClientId"]?.ToString() ?? "",
+            ClientSecret = formInput["ClientSecret"]?.ToString() ?? "",
+        }.Save();
 
         Task.Run(LogIn).Wait();
 

@@ -9,87 +9,28 @@ using SpotifyAPI.Web.Auth;
 class AuthenticatedSpotifyClient
 {
     private static EmbedIOAuthServer? authServer;
-    private static string clientId = "";
-    private static string clientSecret = "";
 
     private static PrivateUser? user;
     private static string errorMessage = "";
-
-    public static string SecretsPath()
-    {
-        return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
-            + "\\.scopestify\\secrets.json";
-    }
 
     public static Uri callbackUri = new("http://localhost:5543/callback");
 
     public static SpotifyClient Get()
     {
-        var accessToken = "";
-
-        try
-        {
-            // Create secrets file if it doesn't exist
-            if (!System.IO.File.Exists(SecretsPath()))
-            {
-                var dir = System.IO.Path.GetDirectoryName(SecretsPath());
-                if (dir != null && !System.IO.Directory.Exists(dir))
-                {
-                    System.IO.Directory.CreateDirectory(dir);
-                }
-                System.IO.File.WriteAllText(
-                    SecretsPath(),
-                    "{\n  \"client_id\": \"\",\n  \"client_secret\": \"\",\n  \"access_token\": \"\"\n}"
-                );
-            }
-
-            var secrets = System
-                .Text.Json.JsonDocument.Parse(System.IO.File.ReadAllText(SecretsPath()))
-                .RootElement;
-
-            accessToken = secrets.GetProperty("access_token").GetString();
-        }
-        catch (Exception)
-        {
-            // TODO
-        }
-
-        return new SpotifyClient(accessToken ?? "");
+        return new SpotifyClient(new ConfigurationFile().AccessToken);
     }
 
     public static void LogOut()
     {
         // Just blank out the saved access_token from the file
-        var secretsPath = SecretsPath();
-        if (System.IO.File.Exists(secretsPath))
-        {
-            var existingSecrets = System
-                .Text.Json.JsonDocument.Parse(System.IO.File.ReadAllText(secretsPath))
-                .RootElement;
-
-            var updatedSecrets = new Dictionary<string, string>
-            {
-                ["client_id"] = existingSecrets.GetProperty("client_id").GetString() ?? "",
-                ["client_secret"] = existingSecrets.GetProperty("client_secret").GetString() ?? "",
-                ["access_token"] = "",
-                ["scopes"] = existingSecrets.GetProperty("scopes").GetString() ?? "",
-            };
-
-            System.IO.File.WriteAllText(
-                SecretsPath(),
-                System.Text.Json.JsonSerializer.Serialize(updatedSecrets)
-            );
-        }
+        var config = new ConfigurationFile { AccessToken = "" };
+        config.Save();
     }
 
     public static async Task<(PrivateUser? user, string errorMessage)> LogIn()
     {
         // Get client_id and client_secret from secrets.json
-        var secretsText = System.IO.File.ReadAllText(SecretsPath());
-        var secrets = System.Text.Json.JsonDocument.Parse(secretsText).RootElement;
-
-        clientId = secrets.GetProperty("client_id").GetString() ?? "";
-        clientSecret = secrets.GetProperty("client_secret").GetString() ?? "";
+        var config = new ConfigurationFile();
 
         // Spin up a local HTTP server to listen for the OAuth callback
         authServer = new EmbedIOAuthServer(callbackUri, callbackUri.Port);
@@ -97,7 +38,7 @@ class AuthenticatedSpotifyClient
         // Make sure "http://localhost:5543/callback" is in your applications redirect URIs!
         var loginRequest = new LoginRequest(
             authServer.BaseUri,
-            clientId,
+            config.ClientId,
             LoginRequest.ResponseType.Code
         )
         {
@@ -134,25 +75,21 @@ class AuthenticatedSpotifyClient
         AuthorizationCodeResponse response
     )
     {
+        var config = new ConfigurationFile();
+
         await authServer?.Stop();
 
-        var config = SpotifyClientConfig.CreateDefault();
-        var tokenResponse = await new OAuthClient(config).RequestToken(
-            new AuthorizationCodeTokenRequest(clientId, clientSecret, response.Code, callbackUri)
+        var tokenResponse = await new OAuthClient(SpotifyClientConfig.CreateDefault()).RequestToken(
+            new AuthorizationCodeTokenRequest(
+                config.ClientId,
+                config.ClientSecret,
+                response.Code,
+                callbackUri
+            )
         );
 
-        var updatedSecrets = new Dictionary<string, string>
-        {
-            ["client_id"] = clientId,
-            ["client_secret"] = clientSecret,
-            ["access_token"] = tokenResponse.AccessToken,
-            ["scopes"] = tokenResponse.Scope ?? "",
-        };
-
-        System.IO.File.WriteAllText(
-            SecretsPath(),
-            System.Text.Json.JsonSerializer.Serialize(updatedSecrets)
-        );
+        config.AccessToken = tokenResponse.AccessToken;
+        config.Save();
 
         var spotify = new SpotifyClient(tokenResponse.AccessToken);
         user = await spotify.UserProfile.Current();
