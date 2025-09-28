@@ -60,7 +60,7 @@ class AuthenticatedSpotifyClient
     public static void LogOut()
     {
         // Just blank out the saved access_token from the file
-        var secretsPath = AuthenticatedSpotifyClient.SecretsPath();
+        var secretsPath = SecretsPath();
         if (System.IO.File.Exists(secretsPath))
         {
             var existingSecrets = System
@@ -76,7 +76,7 @@ class AuthenticatedSpotifyClient
             };
 
             System.IO.File.WriteAllText(
-                AuthenticatedSpotifyClient.SecretsPath(),
+                SecretsPath(),
                 System.Text.Json.JsonSerializer.Serialize(updatedSecrets)
             );
         }
@@ -92,10 +92,7 @@ class AuthenticatedSpotifyClient
         clientSecret = secrets.GetProperty("client_secret").GetString() ?? "";
 
         // Spin up a local HTTP server to listen for the OAuth callback
-        authServer = new EmbedIOAuthServer(
-            AuthenticatedSpotifyClient.callbackUri,
-            AuthenticatedSpotifyClient.callbackUri.Port
-        );
+        authServer = new EmbedIOAuthServer(callbackUri, callbackUri.Port);
 
         // Make sure "http://localhost:5543/callback" is in your applications redirect URIs!
         var loginRequest = new LoginRequest(
@@ -141,12 +138,7 @@ class AuthenticatedSpotifyClient
 
         var config = SpotifyClientConfig.CreateDefault();
         var tokenResponse = await new OAuthClient(config).RequestToken(
-            new AuthorizationCodeTokenRequest(
-                clientId,
-                clientSecret,
-                response.Code,
-                AuthenticatedSpotifyClient.callbackUri
-            )
+            new AuthorizationCodeTokenRequest(clientId, clientSecret, response.Code, callbackUri)
         );
 
         var updatedSecrets = new Dictionary<string, string>
@@ -158,7 +150,7 @@ class AuthenticatedSpotifyClient
         };
 
         System.IO.File.WriteAllText(
-            AuthenticatedSpotifyClient.SecretsPath(),
+            SecretsPath(),
             System.Text.Json.JsonSerializer.Serialize(updatedSecrets)
         );
 

@@ -11,8 +11,6 @@ internal sealed partial class LoginCommand : InvokableCommand
     public override string Name => "Login to Spotify";
     public override IconInfo Icon => new("\uE8D7");
 
-    private static EmbedIOAuthServer? authServer;
-
     private static PrivateUser? user;
     private static string errorMessage = "";
 
