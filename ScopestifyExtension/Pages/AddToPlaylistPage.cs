@@ -18,6 +18,7 @@ internal sealed partial class AddToPlaylistPage : ListPage
         Icon = new("\uE710");
         Title = "Add current track to playlist";
         Name = "Add to playlist";
+        ShowDetails = true;
 
         Task.Run(LoadData).Wait();
     }
@@ -43,6 +44,39 @@ internal sealed partial class AddToPlaylistPage : ListPage
                     }.Where(s => !string.IsNullOrEmpty(s))
                 ),
                 Icon = new IconInfo(playlist.Images?.FirstOrDefault()?.Url ?? "\uF147"),
+                Details = new Details
+                {
+                    Title = playlist.Name ?? "Unnamed playlist",
+                    Body = playlist.Description ?? "No description",
+                    HeroImage = new IconInfo(playlist.Images?.FirstOrDefault()?.Url ?? "\uF147"),
+                    Metadata =
+                    [
+                        new DetailsElement
+                        {
+                            Key = "By",
+                            Data =
+                                playlist.Owner?.Id == currentUser?.Id
+                                    ? new DetailsLink("You")
+                                    : new DetailsLink(
+                                        playlist.Owner.ExternalUrls?["spotify"] ?? "",
+                                        playlist.Owner?.DisplayName ?? "Unknown"
+                                    ),
+                        },
+                        new DetailsElement
+                        {
+                            Key = "Tracks",
+                            Data = new DetailsLink(playlist.Tracks?.Total.ToString() ?? "?"),
+                        },
+                        new DetailsElement
+                        {
+                            Key = "Playlist ID",
+                            Data = new DetailsLink(
+                                playlist.ExternalUrls?["spotify"] ?? "",
+                                playlist.Id ?? "?"
+                            ),
+                        },
+                    ],
+                },
             }),
         ];
     }
