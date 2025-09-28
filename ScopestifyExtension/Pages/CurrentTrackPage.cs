@@ -85,6 +85,7 @@ internal sealed partial class CurrentTrackPage : ListPage
         [
             new ListItem(new LikeCurrentTrackCommand(remove: liked))
             {
+                Title = liked ? "Remove from liked tracks" : "Like track",
                 Subtitle = liked
                     ? "Track is already in your Liked Songs"
                     : "Add to your Liked Songs",
