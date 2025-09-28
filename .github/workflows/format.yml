@@ -1,4 +1,6 @@
 name: Code Formatting
+# This workflow uses a deploy key to bypass branch protection rules when pushing formatted code.
+# See .github/DEPLOY_KEY_SETUP.md for setup instructions.
 
 on:
   push:
@@ -18,7 +20,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        # Use deploy key for checkout to bypass branch protection rules when pushing
+        ssh-key: ${{ secrets.DEPLOY_KEY }}
+        # Fetch full history for proper git operations
+        fetch-depth: 0
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
@@ -43,4 +48,6 @@ jobs:
         git config --local user.name "GitHub Action"
         git add .
         git diff --staged --quiet || git commit -m "🎨 Auto-format code with CSharpier [skip ci]"
+        # Push using SSH deploy key (configured during checkout)
+        # This allows pushing even when branch protection rules require status checks
         git push
