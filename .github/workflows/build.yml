@@ -1,0 +1,134 @@
+---
+name: Build Scopestify Extension
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  SOLUTION_FILE_PATH: ./ScopestifyExtension.sln
+  PROJECT_FILE_PATH: ./ScopestifyExtension/ScopestifyExtension.csproj
+  BUILD_CONFIGURATION: Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - platform: x86
+            runtime: win-x86
+          - platform: ARM64
+            runtime: win-arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore NuGet packages
+        run: dotnet restore ${{ env.SOLUTION_FILE_PATH }}
+
+      - name: Build and publish with dotnet
+        run: |
+          dotnet publish ${{ env.PROJECT_FILE_PATH }} `
+            -c ${{ env.BUILD_CONFIGURATION }} `
+            -r ${{ matrix.runtime }} `
+            --self-contained true `
+            -p:PublishSingleFile=false `
+            -p:PublishReadyToRun=true `
+            -p:Platform=${{ matrix.platform }}
+        shell: powershell
+
+      - name: Create MSIX package using MSBuild
+        run: |
+          msbuild ${{ env.PROJECT_FILE_PATH }} `
+            /p:Configuration=${{ env.BUILD_CONFIGURATION }} `
+            /p:Platform=${{ matrix.platform }} `
+            /p:UapAppxPackageBuildMode=StoreUpload `
+            /p:AppxBundle=Always `
+            /p:AppxBundlePlatforms=${{ matrix.platform }}
+        shell: powershell
+
+      - name: Create artifact directory
+        run: |
+          New-Item -Path ".\artifacts\${{ matrix.platform }}" `
+            -ItemType Directory -Force
+        shell: powershell
+
+      - name: Copy published outputs
+        run: |
+          $publishPath = ".\ScopestifyExtension\bin\" +
+            "${{ env.BUILD_CONFIGURATION }}\net9.0-windows10.0.22621.0\" +
+            "${{ matrix.runtime }}\publish"
+          $destPath = ".\artifacts\${{ matrix.platform }}\publish"
+          if (Test-Path $publishPath) {
+            Copy-Item -Path $publishPath -Destination $destPath `
+              -Recurse -Force
+            Write-Output "Copied published files from $publishPath"
+          } else {
+            Write-Warning "Publish path not found: $publishPath"
+          }
+        shell: powershell
+
+      - name: Copy MSIX packages
+        run: |
+          $msixPath = ".\ScopestifyExtension\bin\" +
+            "${{ matrix.platform }}\${{ env.BUILD_CONFIGURATION }}\*.msix"
+          $appxUploadPath = ".\ScopestifyExtension\AppPackages"
+          $destPath = ".\artifacts\${{ matrix.platform }}\packages"
+          New-Item -Path $destPath -ItemType Directory -Force
+
+          # Copy individual MSIX files if they exist
+          $msixFiles = Get-ChildItem -Path ".\ScopestifyExtension\bin\" +
+            "${{ matrix.platform }}\${{ env.BUILD_CONFIGURATION }}" `
+            -Filter "*.msix" -ErrorAction SilentlyContinue
+          if ($msixFiles) {
+            Copy-Item -Path $msixFiles.FullName -Destination $destPath -Force
+            Write-Output "Copied MSIX files: $($msixFiles.Name -join ', ')"
+          }
+
+          # Copy AppPackages if they exist
+          if (Test-Path $appxUploadPath) {
+            Copy-Item -Path "$appxUploadPath\*" -Destination $destPath `
+              -Recurse -Force
+            Write-Output "Copied AppPackages from $appxUploadPath"
+          }
+        shell: powershell
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: scopestify-extension-${{ matrix.platform }}
+          path: ./artifacts/${{ matrix.platform }}/
+          retention-days: 30
+
+  build-summary:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Build Summary
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Built for architectures: x86, ARM64" >> $GITHUB_STEP_SUMMARY
+          echo "Configuration: Release" >> $GITHUB_STEP_SUMMARY
+          echo "Artifacts uploaded with 30-day retention" \
+            >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifacts Generated" >> $GITHUB_STEP_SUMMARY
+          echo "- scopestify-extension-x86" \
+            "(x86 build + MSIX packages)" >> $GITHUB_STEP_SUMMARY
+          echo "- scopestify-extension-ARM64" \
+            "(ARM64 build + MSIX packages)" >> $GITHUB_STEP_SUMMARY
