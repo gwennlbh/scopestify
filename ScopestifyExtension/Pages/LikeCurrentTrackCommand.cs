@@ -6,10 +6,11 @@ using SpotifyAPI.Web;
 
 namespace ScopestifyExtension;
 
-internal sealed partial class LikeCurrentTrackCommand : InvokableCommand
+internal sealed partial class LikeCurrentTrackCommand(bool remove = false) : InvokableCommand
 {
-    public override string Name => "Like current track";
-    public override IconInfo Icon => new("\uEB51");
+    public override string Name =>
+        remove ? "Remove currently playing from liked tracks" : "Like current track";
+    public override IconInfo Icon => remove ? new("\uEA92") : new("\uEB51");
 
     private FullTrack? currentTrack;
 
@@ -32,14 +33,29 @@ internal sealed partial class LikeCurrentTrackCommand : InvokableCommand
             new LibraryCheckTracksRequest([currentTrack.Id ?? ""])
         );
 
-        if (savedTracks.Count > 0 && savedTracks[0])
+        if (savedTracks.Count > 0 && savedTracks[0] && !remove)
         {
             throw new InvalidOperationException(
                 $"Track {Utils.TrackFullName(currentTrack)} is already liked"
             );
         }
+        else if (remove)
+        {
+            throw new InvalidOperationException(
+                $"Track {Utils.TrackFullName(currentTrack)} is not liked"
+            );
+        }
 
-        await spotify.Library.SaveTracks(new LibrarySaveTracksRequest([currentTrack.Id ?? ""]));
+        if (remove)
+        {
+            await spotify.Library.RemoveTracks(
+                new LibraryRemoveTracksRequest([currentTrack.Id ?? ""])
+            );
+        }
+        else
+        {
+            await spotify.Library.SaveTracks(new LibrarySaveTracksRequest([currentTrack.Id ?? ""]));
+        }
     }
 
     public override CommandResult Invoke()
@@ -49,7 +65,7 @@ internal sealed partial class LikeCurrentTrackCommand : InvokableCommand
             Task.Run(Run).Wait();
 
             var config = new ConfigurationFile();
-            if (config.PostLikeHook != "")
+            if (config.PostLikeHook != "" && !remove)
             {
                 try
                 {
@@ -78,7 +94,12 @@ internal sealed partial class LikeCurrentTrackCommand : InvokableCommand
             }
 
             return CommandResult.ShowToast(
-                new ToastArgs { Message = $"Liked {Utils.TrackFullName(currentTrack)}" }
+                new ToastArgs
+                {
+                    Message = remove
+                        ? $"Removed {Utils.TrackFullName(currentTrack)} from liked tracks"
+                        : $"Liked {Utils.TrackFullName(currentTrack)}",
+                }
             );
         }
         catch (Exception ex)

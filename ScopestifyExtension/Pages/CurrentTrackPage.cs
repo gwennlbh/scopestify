@@ -15,6 +15,7 @@ internal sealed partial class CurrentTrackPage : ListPage
 
     private FullTrack? currentTrack;
     private FullArtist[] artists = [];
+    private bool liked;
 
     public CurrentTrackPage()
     {
@@ -82,9 +83,11 @@ internal sealed partial class CurrentTrackPage : ListPage
 
         return
         [
-            new ListItem(new LikeCurrentTrackCommand())
+            new ListItem(new LikeCurrentTrackCommand(remove: liked))
             {
-                Subtitle = "Add to your Liked Songs",
+                Subtitle = liked
+                    ? "Track is already in your Liked Songs"
+                    : "Add to your Liked Songs",
                 Details = details,
             },
             new ListItem(new NavigateCommand(new MyPlaylistsPage()))
@@ -161,6 +164,12 @@ internal sealed partial class CurrentTrackPage : ListPage
         );
 
         currentTrack = playback.Item as FullTrack;
+
+        liked = await spotify
+            .Library.CheckTracks(new LibraryCheckTracksRequest([currentTrack?.Id ?? ""]))
+            // Assume track is not liked if we can't check
+            .ContinueWith(t => t.Result.FirstOrDefault());
+
         artists = [];
 
         foreach (var artist in currentTrack?.Artists ?? [])
