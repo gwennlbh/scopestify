@@ -1,0 +1,32 @@
+<Project>
+  <PropertyGroup>
+    <!-- Enable additional code analysis rules -->
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)analyzers.ruleset</CodeAnalysisRuleSet>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>All</AnalysisMode>
+    <AnalysisLevel>latest</AnalysisLevel>
+    
+    <!-- Security analyzers -->
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    
+    <!-- Enforce code quality -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    
+    <!-- Enable nullable reference types globally -->
+    <Nullable>enable</Nullable>
+    
+    <!-- Documentation file generation -->
+    <GenerateDocumentationFile Condition="'$(Configuration)' == 'Release'">true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Add additional analyzers in Release builds -->
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Suppress specific warnings that are not applicable to this project type -->
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CA1014;CA2007;CA1303;CA1031</NoWarn>
+  </PropertyGroup>
+</Project>

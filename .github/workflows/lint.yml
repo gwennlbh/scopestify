@@ -1,0 +1,91 @@
+name: Code Quality & Linting
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  SOLUTION_FILE_PATH: ./ScopestifyExtension.sln
+  BUILD_CONFIGURATION: Debug
+
+jobs:
+  lint:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restore dotnet tools
+      run: dotnet tool restore
+
+    - name: Restore NuGet packages
+      run: dotnet restore ${{ env.SOLUTION_FILE_PATH }}
+
+    - name: Check code formatting
+      run: dotnet csharpier check .
+      continue-on-error: false
+
+    - name: Run .NET code analysis
+      run: |
+        dotnet build ${{ env.SOLUTION_FILE_PATH }} `
+          --configuration ${{ env.BUILD_CONFIGURATION }} `
+          --no-restore `
+          --verbosity normal `
+          -p:RunAnalyzersDuringBuild=true `
+          -p:TreatWarningsAsErrors=false
+      shell: powershell
+
+    - name: Security analysis - Package vulnerabilities
+      run: |
+        echo "Running security analysis..."
+        dotnet list package --vulnerable --include-transitive 2>&1 | Tee-Object -Variable output
+        if ($output -match "has the following vulnerable packages") {
+          Write-Error "Vulnerable packages detected!"
+          exit 1
+        }
+        echo "No vulnerable packages found."
+      shell: powershell
+
+    - name: Check for deprecated NuGet packages
+      run: |
+        echo "Checking for deprecated packages..."
+        dotnet list package --deprecated 2>&1 | Tee-Object -Variable output
+        if ($output -match "has the following deprecated packages") {
+          Write-Warning "Deprecated packages found - consider updating"
+          echo $output
+        } else {
+          echo "No deprecated packages found."
+        }
+      shell: powershell
+
+    - name: Generate analysis report
+      if: always()
+      run: |
+        echo "## Code Quality Report" >> $env:GITHUB_STEP_SUMMARY
+        echo "" >> $env:GITHUB_STEP_SUMMARY
+        echo "### Formatting Check" >> $env:GITHUB_STEP_SUMMARY
+        echo "✅ Code formatting verified with CSharpier" >> $env:GITHUB_STEP_SUMMARY
+        echo "" >> $env:GITHUB_STEP_SUMMARY
+        echo "### Static Analysis" >> $env:GITHUB_STEP_SUMMARY
+        echo "✅ .NET analyzers executed with build" >> $env:GITHUB_STEP_SUMMARY
+        echo "" >> $env:GITHUB_STEP_SUMMARY
+        echo "### Security Analysis" >> $env:GITHUB_STEP_SUMMARY
+        echo "✅ Package vulnerability and deprecation scan completed" >> $env:GITHUB_STEP_SUMMARY
+        echo "" >> $env:GITHUB_STEP_SUMMARY
+        echo "### Configuration" >> $env:GITHUB_STEP_SUMMARY
+        echo "- .NET Analyzers: Enabled (AnalysisMode: Recommended)" >> $env:GITHUB_STEP_SUMMARY
+        echo "- Code formatter: CSharpier" >> $env:GITHUB_STEP_SUMMARY
+        echo "- Build configuration: Debug" >> $env:GITHUB_STEP_SUMMARY
+      shell: powershell

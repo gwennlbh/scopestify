@@ -16,7 +16,10 @@ internal sealed partial class AddToPlaylistCommand : InvokableCommand
 
     private FullTrack? currentTrack;
 
-    public AddToPlaylistCommand(string playlistId) { this.playlistId = playlistId; }
+    public AddToPlaylistCommand(string playlistId)
+    {
+        this.playlistId = playlistId;
+    }
 
     private async Task Run()
     {
