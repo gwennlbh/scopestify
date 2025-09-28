@@ -74,7 +74,13 @@ internal sealed partial class LoginPage : ListPage
             items =
             [
                 .. items,
-                new ListItem(new ShowFileInFolderCommand(ConfigurationFile.Path()))
+                new ListItem(
+                    new ShowFileInFolderCommand(
+                        // Get parent dir of config file
+                        System.IO.Path.GetDirectoryName(ConfigurationFile.Path())
+                        ?? ""
+                    )
+                )
                 {
                     Title = "Reveal configuration file",
                     Subtitle = "Show the configuration file's folder in Explorer",

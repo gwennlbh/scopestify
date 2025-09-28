@@ -17,10 +17,11 @@ public partial class ScopestifyExtensionCommandsProvider : CommandProvider
         Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png");
         _commands =
         [
-            new CommandItem(new AddToPlaylistPage()) { Title = "Add current track to playlist..." },
+            new CommandItem(new MyPlaylistsPage()) { Title = "See your playlists" },
             new CommandItem(new LikeCurrentTrackCommand()) { Title = "Like current track" },
             new CommandItem(new SearchPage()) { Title = "Search on Spotify" },
             new CommandItem(new LoginPage()) { Title = "Authenticate with Spotify" },
+            new CommandItem(new CurrentTrackPage()) { Title = "See current track" },
         ];
     }
 

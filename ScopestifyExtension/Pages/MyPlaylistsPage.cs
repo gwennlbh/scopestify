@@ -1,23 +1,28 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
+using SpotifyAPI.Web.Http;
 
 namespace ScopestifyExtension;
 
-internal sealed partial class AddToPlaylistPage : ListPage
+internal sealed partial class MyPlaylistsPage : ListPage
 {
     private SpotifyClient spotify = AuthenticatedSpotifyClient.Get();
 
     private FullPlaylist[] playlists = [];
     private PrivateUser? currentUser;
 
-    public AddToPlaylistPage()
+    public MyPlaylistsPage()
     {
-        Icon = new("\uE710");
-        Title = "Add current track to playlist";
-        Name = "Add to playlist";
+        Icon = new("\uE90B");
+        Title = "Play a playlist or add current track to a playlist";
+        Name = "My Playlists";
         ShowDetails = true;
 
         Task.Run(LoadData).Wait();
@@ -43,6 +48,20 @@ internal sealed partial class AddToPlaylistPage : ListPage
                     }.Where(s => !string.IsNullOrEmpty(s))
                 ),
                 Icon = new IconInfo(playlist.Images?.FirstOrDefault()?.Url ?? "\uF147"),
+                MoreCommands =
+                [
+                    new CommandContextItem(
+                        new PlayPlaylistCommand(
+                            playlist.Uri ?? "",
+                            playlist.Name ?? "",
+                            enqueue: false
+                        )
+                    ),
+                    new CommandContextItem(new OpenUrlCommand(playlist.Uri ?? ""))
+                    {
+                        Title = "Open in Spotify",
+                    },
+                ],
                 Details = new Details
                 {
                     Title = playlist.Name ?? "Unnamed playlist",
@@ -57,7 +76,7 @@ internal sealed partial class AddToPlaylistPage : ListPage
                                 playlist.Owner?.Id == currentUser?.Id
                                     ? new DetailsLink("You")
                                     : new DetailsLink(
-                                        playlist.Owner.ExternalUrls?["spotify"] ?? "",
+                                        playlist.Owner.Uri ?? "",
                                         playlist.Owner?.DisplayName ?? "Unknown"
                                     ),
                         },
@@ -69,10 +88,7 @@ internal sealed partial class AddToPlaylistPage : ListPage
                         new DetailsElement
                         {
                             Key = "Playlist ID",
-                            Data = new DetailsLink(
-                                playlist.ExternalUrls?["spotify"] ?? "",
-                                playlist.Id ?? "?"
-                            ),
+                            Data = new DetailsLink(playlist.Uri ?? "", playlist.Id ?? "?"),
                         },
                     ],
                 },
@@ -85,8 +101,12 @@ internal sealed partial class AddToPlaylistPage : ListPage
         try
         {
             var playlistsFirstPage = await spotify.Playlists.CurrentUsers();
-            var allPlaylists = await spotify.PaginateAll(playlistsFirstPage);
-            playlists = [.. allPlaylists];
+            playlistsFirstPage.Limit = 50; // max limit
+            var playlistsAllPages = await spotify.PaginateAll(playlistsFirstPage);
+            playlists = [.. playlistsAllPages];
+            Debug.WriteLine(
+                $"Fetched playlists: {string.Join(", ", playlists.Select(p => p.Name))}"
+            );
         }
         catch (Exception ex)
         {

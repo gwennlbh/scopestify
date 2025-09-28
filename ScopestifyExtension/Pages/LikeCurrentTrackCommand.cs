@@ -11,12 +11,12 @@ internal sealed partial class LikeCurrentTrackCommand : InvokableCommand
     public override string Name => "Like current track";
     public override IconInfo Icon => new("\uEB51");
 
-    private readonly SpotifyClient spotify = AuthenticatedSpotifyClient.Get();
-
     private FullTrack? currentTrack;
 
     private async Task Run()
     {
+        var spotify = AuthenticatedSpotifyClient.Get();
+
         var playback = await spotify.Player.GetCurrentlyPlaying(
             new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track)
         );

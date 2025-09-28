@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using ScopestifyExtension;
 using SpotifyAPI.Web;
@@ -32,6 +33,14 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
         Icon = new("\uE721");
         ShowDetails = true;
     }
+
+    public override ICommandItem? EmptyContent =>
+        new CommandItem(new NoOpCommand())
+        {
+            Title = SearchText == "" ? "Type to search on Spotify" : "No results found",
+            Subtitle = "Use prefixes 't:', 'a:' or 'p:' to search only tracks, albums or playlists",
+            Icon = new IconInfo("\uE721"),
+        };
 
     public override void UpdateSearchText(string _old, string newText)
     {
@@ -91,6 +100,18 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                         Title = "Add to queue",
                         Icon = new IconInfo("\uE710"),
                     },
+                    new CommandContextItem(new OpenUrlCommand(track.Uri ?? ""))
+                    {
+                        Title = "Open in Spotify",
+                    },
+                    new CommandContextItem(new OpenUrlCommand(track.Album?.Uri ?? ""))
+                    {
+                        Icon = new IconInfo("\uE93C"),
+                        Title =
+                            track.Album.Name == track.Name
+                                ? "Open album in Spotify"
+                                : $"Open {track.Album?.Name} in Spotify",
+                    },
                 ],
                 Details = new Details
                 {
@@ -105,10 +126,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                             ? new DetailsElement
                             {
                                 Key = $"Track {track.TrackNumber} on",
-                                Data = new DetailsLink(
-                                    track.Album.ExternalUrls?["spotify"] ?? "",
-                                    track.Album.Name
-                                ),
+                                Data = new DetailsLink(track.Album.Uri ?? "", track.Album.Name),
                             }
                             : new DetailsElement()
                             {
@@ -125,10 +143,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                         new DetailsElement
                         {
                             Key = "Track ID",
-                            Data = new DetailsLink(
-                                track.ExternalUrls?["spotify"] ?? "",
-                                track.Id ?? "?"
-                            ),
+                            Data = new DetailsLink(track.Uri ?? "", track.Id ?? "?"),
                         },
                     ],
                 },
@@ -153,6 +168,10 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                         Title = "Add to queue",
                         Icon = new IconInfo("\uE710"),
                     },
+                    new CommandContextItem(new OpenUrlCommand(album.Uri ?? ""))
+                    {
+                        Title = "Open in Spotify",
+                    },
                 ],
                 Details = new Details
                 {
@@ -174,10 +193,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                         new DetailsElement
                         {
                             Key = "Album ID",
-                            Data = new DetailsLink(
-                                album.ExternalUrls?["spotify"] ?? "",
-                                album.Id ?? "?"
-                            ),
+                            Data = new DetailsLink(album.Uri ?? "", album.Id ?? "?"),
                         },
                     ],
                 },
@@ -210,6 +226,10 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                     Icon = new IconInfo(playlist?.Images?.FirstOrDefault()?.Url ?? "\uF147"),
                     MoreCommands =
                     [
+                        new CommandContextItem(new OpenUrlCommand(playlist.Uri ?? ""))
+                        {
+                            Title = "Open in Spotify",
+                        },
                         new CommandContextItem(
                             new PlayPlaylistCommand(
                                 playlist?.Uri ?? "",
@@ -238,7 +258,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                                     playlist?.Owner?.Id == currentUser?.Id
                                         ? new DetailsLink("You")
                                         : new DetailsLink(
-                                            playlist?.Owner?.ExternalUrls?["spotify"] ?? "",
+                                            playlist?.Owner?.Uri ?? "",
                                             playlist?.Owner?.DisplayName ?? "Unknown"
                                         ),
                             },
@@ -250,10 +270,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                             new DetailsElement
                             {
                                 Key = "Playlist ID",
-                                Data = new DetailsLink(
-                                    playlist?.ExternalUrls?["spotify"] ?? "",
-                                    playlist?.Id ?? "?"
-                                ),
+                                Data = new DetailsLink(playlist?.Uri ?? "", playlist?.Id ?? "?"),
                             },
                         ],
                     },
@@ -326,7 +343,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
             var OnlyPlaylists = query.StartsWith("p:");
             if (OnlyTracks || OnlyAlbums || OnlyPlaylists)
             {
-                query = query.Split(':', 2)[1].Trim();
+                query = query.Substring(2).Trim();
             }
 
             var EnableTracksSearch = !OnlyAlbums && !OnlyPlaylists;
