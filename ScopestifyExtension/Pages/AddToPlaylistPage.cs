@@ -13,14 +13,17 @@ internal sealed partial class AddToPlaylistPage : ListPage
     private Paging<FullPlaylist>? playlistsPage;
     private FullPlaylist[] playlists = [];
     private PrivateUser? currentUser;
+    private FullTrack? currentTrack;
 
     public AddToPlaylistPage()
     {
         Icon = new("\uE710");
-        Title = "Add current track to playlist";
+        Title = "Add current track to a playlist";
         Name = "Add to playlist";
 
         Task.Run(LoadData).Wait();
+
+        Title = $"Add {Utils.TrackFullName(currentTrack)} to a playlist";
     }
 
     public override ListItem[] GetItems()
@@ -29,23 +32,38 @@ internal sealed partial class AddToPlaylistPage : ListPage
 
         return
         [
-            .. playlists.Select(playlist => new ListItem(
-                new AddToPlaylistCommand(playlist.Id ?? "", playlist.Name ?? "")
-            )
+            .. playlists.Select(playlist =>
             {
-                Title = playlist.Name ?? "Unnamed playlist",
-                Subtitle = string.Join(
-                    " • ",
-                    new string[]
-                    {
-                        playlist.Owner?.Id != currentUser?.Id
-                            ? $"By {playlist.Owner?.DisplayName}"
-                            : "",
-                        playlist.Description ?? "",
-                        playlist.Tracks?.Total != null ? $"{playlist.Tracks.Total} tracks" : "",
-                    }.Where(s => !string.IsNullOrEmpty(s))
-                ),
-                Icon = new IconInfo(playlist.Images?.FirstOrDefault()?.Url ?? "\uF147"),
+                var alreadyInPlaylist =
+                    playlist.Tracks?.Items?.Any(t =>
+                        t.Track.Type == ItemType.Track
+                        && (t.Track as PlaylistTrack<FullTrack>)?.Track.Id == currentTrack?.Id
+                    ) ?? false;
+
+                return new ListItem(new AddToPlaylistCommand(playlist.Id ?? ""))
+                {
+                    Icon = new IconInfo(
+                        alreadyInPlaylist
+                            ? "\uE73E"
+                            : playlist.Images?.FirstOrDefault()?.Url ?? "\uF147"
+                    ),
+                    Title = playlist.Name ?? "Unnamed playlist",
+                    Subtitle = alreadyInPlaylist
+                        ? "Already in playlist"
+                        : string.Join(
+                            " • ",
+                            new string[]
+                            {
+                                playlist.Owner?.Id != currentUser?.Id
+                                    ? $"By {playlist.Owner?.DisplayName}"
+                                    : "",
+                                playlist.Description ?? "",
+                                playlist.Tracks?.Total != null
+                                    ? $"{playlist.Tracks.Total} tracks"
+                                    : "",
+                            }.Where(s => !string.IsNullOrEmpty(s))
+                        ),
+                };
             }),
         ];
     }
@@ -65,6 +83,13 @@ internal sealed partial class AddToPlaylistPage : ListPage
         try
         {
             currentUser = await spotify.UserProfile.Current();
+            currentTrack = await spotify
+                .Player.GetCurrentlyPlaying(
+                    new PlayerCurrentlyPlayingRequest(
+                        PlayerCurrentlyPlayingRequest.AdditionalTypes.Track
+                    )
+                )
+                .ContinueWith(t => t.Result.Item as FullTrack);
         }
         catch (Exception)
         { /* ignore */
