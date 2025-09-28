@@ -1,0 +1,43 @@
+name: Code Formatting
+
+on:
+  push:
+    branches: [ main ]
+    paths: ['**.cs']
+  pull_request:
+    branches: [ main ]
+    paths: ['**.cs']
+
+jobs:
+  format:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restore dotnet tools
+      run: dotnet tool restore
+
+    - name: Check formatting
+      if: github.event_name == 'pull_request'
+      run: dotnet csharpier --check .
+
+    - name: Format code
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: dotnet csharpier .
+
+    - name: Commit formatted changes
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git diff --staged --quiet || git commit -m "Auto-format code with CSharpier [skip ci]"
+        git push
