@@ -19,34 +19,61 @@ internal sealed partial class LoginPage : ListPage
 
     public override ListItem[] GetItems()
     {
-        return
-        [
-            currentUser == null
-                ? new ListItem(new LoginCommand())
+        var items = Array.Empty<ListItem>();
+
+        var config = new ConfigurationFile();
+
+        if (currentUser != null)
+        {
+            items =
+            [
+                .. items,
+                new ListItem(new NoOpCommand())
+                {
+                    Title = $"Logged in as {currentUser.DisplayName}",
+                    Subtitle = $"User ID: {currentUser.Id}",
+                    Icon = new IconInfo(currentUser?.Images.FirstOrDefault()?.Url ?? "\uE949"),
+                },
+            ];
+        }
+
+        if (config.ClientId != "" && config.ClientSecret != "")
+        {
+            items =
+            [
+                .. items,
+                new ListItem(new LoginCommand())
                 {
                     Title = "Login to Spotify",
                     Subtitle = "After having registered your App's credentials",
-                }
-                : new ListItem(new LogoutCommand())
-                {
-                    Title = "Logout from Spotify",
-                    Subtitle = "Clear the stored credentials",
                 },
+            ];
+        }
+
+        items =
+        [
+            .. items,
             new ListItem(new RegisterAppFormPage())
             {
                 Title = "Register your App",
-                Subtitle = $"Secrets are stored at {AuthenticatedSpotifyClient.SecretsPath()}",
-            },
-            new ListItem(new NoOpCommand())
-            {
-                Title =
-                    currentUser != null
-                        ? $"Logged in as {currentUser.DisplayName}"
-                        : "Not logged in",
-                Subtitle = currentUser != null ? $"User ID: {currentUser.Id}" : "",
-                Icon = new IconInfo(currentUser?.Images.FirstOrDefault()?.Url ?? "\uE949"),
+                Subtitle = $"Secrets are stored at {ConfigurationFile.Path()}",
             },
         ];
+
+        if (currentUser == null)
+        {
+            items =
+            [
+                .. items,
+                new ListItem(new NoOpCommand())
+                {
+                    Title = "Not logged in",
+                    Icon = new IconInfo("\uE949"),
+                },
+            ];
+        }
+
+        return items;
     }
 
     private async Task GetCurrentUser()
