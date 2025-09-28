@@ -5,6 +5,16 @@ namespace ScopestifyExtension;
 
 public class Utils
 {
+    public static string Artists(FullTrack? track)
+    {
+        if (track == null)
+        {
+            return "Unknown artist";
+        }
+
+        return string.Join(" × ", track.Artists?.Select(a => a.Name) ?? []);
+    }
+
     public static string TrackFullName(FullTrack? track)
     {
         if (track == null)
@@ -12,7 +22,6 @@ public class Utils
             return "Unknown track";
         }
 
-        var artists = string.Join(", ", track.Artists?.Select(a => a.Name) ?? []);
-        return $"{artists} – {track.Name}";
+        return $"{Artists(track)} – {track.Name}";
     }
 }

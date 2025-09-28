@@ -11,6 +11,7 @@ public class ConfigurationFile
     public string AccessToken { get; set; } = "";
     public string Scopes { get; set; } = "";
     public string PostLikeHook { get; set; } = "";
+    public string PostLikeHookCwd { get; set; } = "";
 
     public ConfigurationFile()
     {
@@ -40,6 +41,7 @@ public class ConfigurationFile
         AccessToken = config["access_token"] ?? "";
         Scopes = config["scopes"] ?? "";
         PostLikeHook = config["post_like_hook"] ?? "";
+        PostLikeHookCwd = config["post_like_hook_cwd"] ?? "";
     }
 
     public void Save()

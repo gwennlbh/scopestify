@@ -5,21 +5,18 @@ using SpotifyAPI.Web;
 
 namespace ScopestifyExtension;
 
-internal sealed partial class AddToPlaylistCommand : InvokableCommand
+internal sealed partial class AddToPlaylistCommand(string playlistId, string name)
+    : InvokableCommand
 {
     public override string Name => "Add to playlist";
     public override IconInfo Icon => new("\uF147");
 
     private readonly SpotifyClient spotify = AuthenticatedSpotifyClient.Get();
 
-    private string playlistId;
+    private string playlistId = playlistId;
+    private string name = name;
 
     private FullTrack? currentTrack;
-
-    public AddToPlaylistCommand(string playlistId)
-    {
-        this.playlistId = playlistId;
-    }
 
     private async Task Run()
     {
@@ -46,7 +43,7 @@ internal sealed partial class AddToPlaylistCommand : InvokableCommand
         {
             Task.Run(Run).Wait();
             return CommandResult.ShowToast(
-                new ToastArgs { Message = $"Added {Utils.TrackFullName(currentTrack)}" }
+                new ToastArgs { Message = $"Added {Utils.TrackFullName(currentTrack)} to {name}" }
             );
         }
         catch (Exception ex)

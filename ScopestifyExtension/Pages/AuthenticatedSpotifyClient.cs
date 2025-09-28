@@ -51,6 +51,7 @@ class AuthenticatedSpotifyClient
                 Scopes.PlaylistModifyPublic,
                 Scopes.PlaylistModifyPrivate,
                 Scopes.UserReadPlaybackState,
+                Scopes.UserModifyPlaybackState,
             ],
         };
 
