@@ -101,17 +101,20 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                     Body = Utils.Artists(track),
                     Metadata =
                     [
-                        new DetailsElement
-                        {
-                            Key = "Album",
-                            Data =
-                                track.Album != null
-                                    ? new DetailsLink(
-                                        track.Album.ExternalUrls?["spotify"] ?? "",
-                                        $"Track {track.TrackNumber} on {track.Album.Name}"
-                                    )
-                                    : new DetailsLink("No album"),
-                        },
+                        track.Album != null
+                            ? new DetailsElement
+                            {
+                                Key = $"Track {track.TrackNumber} on",
+                                Data = new DetailsLink(
+                                    track.Album.ExternalUrls?["spotify"] ?? "",
+                                    track.Album.Name
+                                ),
+                            }
+                            : new DetailsElement()
+                            {
+                                Key = "Track is not on any album",
+                                Data = new DetailsLink(""),
+                            },
                         new DetailsElement
                         {
                             Key = "Duration",
