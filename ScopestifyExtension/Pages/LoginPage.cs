@@ -69,6 +69,19 @@ internal sealed partial class LoginPage : ListPage
             },
         ];
 
+        if (config.ClientId != "" && config.ClientSecret != "")
+        {
+            items =
+            [
+                .. items,
+                new ListItem(new ShowFileInFolderCommand(ConfigurationFile.Path()))
+                {
+                    Title = "Reveal configuration file",
+                    Subtitle = "Show the configuration file's folder in Explorer",
+                },
+            ];
+        }
+
         if (currentUser == null)
         {
             items =
