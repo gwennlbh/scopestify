@@ -32,7 +32,7 @@ internal sealed partial class Search : DynamicListPage, IDisposable
     public Search()
     {
         Name = "Search on Spotify";
-        Icon = new("\uE721");
+        Icon = Icons.Search;
         ShowDetails = true;
     }
 
@@ -41,7 +41,7 @@ internal sealed partial class Search : DynamicListPage, IDisposable
         {
             Title = SearchText == "" ? "Type to search on Spotify" : "No results found",
             Subtitle = "Use prefixes 't:', 'a:' or 'p:' to search only tracks, albums or playlists",
-            Icon = new IconInfo("\uE721"),
+            Icon = Icons.Search,
         };
 
     public override void UpdateSearchText(string _old, string newText)
@@ -71,14 +71,7 @@ internal sealed partial class Search : DynamicListPage, IDisposable
     {
         if (!string.IsNullOrEmpty(errorMessage))
         {
-            return
-            [
-                new ListItem(new NoOpCommand())
-                {
-                    Title = errorMessage,
-                    Icon = new IconInfo("\uE783"),
-                },
-            ];
+            return [new ListItem(new NoOpCommand()) { Title = errorMessage, Icon = Icons.Error }];
         }
 
         ListItem[] items =

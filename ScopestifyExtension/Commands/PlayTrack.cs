@@ -13,7 +13,7 @@ sealed partial class PlayTrack(
 ) : InvokableCommand
 {
     public override string Name => enqueue ? "Add track to queue" : "Play track";
-    public override IconInfo Icon => new("\uE768");
+    public override IconInfo Icon => enqueue ? Icons.Import : Icons.Play;
 
     private readonly SpotifyClient spotify = AuthenticatedSpotifyClient.Get();
 

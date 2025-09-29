@@ -18,7 +18,7 @@ internal sealed partial class LikeTrack(string? target, bool remove = false) : I
         : !remove && target == null ? "Like current track"
         : remove && target != null ? "Remove from liked tracks"
         : "Like track";
-    public override IconInfo Icon => remove ? new("\uEA92") : new("\uEB51");
+    public override IconInfo Icon => remove ? Icons.HeartBroken : Icons.Heart;
 
     private FullTrack? track;
 

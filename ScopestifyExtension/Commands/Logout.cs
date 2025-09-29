@@ -5,7 +5,7 @@ namespace ScopestifyExtension.Commands;
 internal sealed partial class Logout : InvokableCommand
 {
     public override string Name => "Logout from Spotify";
-    public override IconInfo Icon => new("\uF3B1");
+    public override IconInfo Icon => Icons.SignOut;
 
     public override CommandResult Invoke()
     {

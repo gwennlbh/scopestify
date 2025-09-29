@@ -14,7 +14,7 @@ internal sealed partial class Authenticate : ListPage
     public Authenticate()
     {
         Name = "Authenticate to Spotify";
-        Icon = new("\uE8D7");
+        Icon = Icons.Permissions;
 
         Task.Run(GetCurrentUser).Wait();
     }
@@ -42,7 +42,7 @@ internal sealed partial class Authenticate : ListPage
                             $"User ID: {currentUser.Id}",
                         ]
                     ),
-                    Icon = new IconInfo(currentUser?.Images.FirstOrDefault()?.Url ?? "\uE949"),
+                    Icon = Icons.WithFallback(currentUser?.Images.FirstOrDefault()?.Url, Icons.You),
                 },
             ];
         }
@@ -97,7 +97,7 @@ internal sealed partial class Authenticate : ListPage
                 new ListItem(new NoOpCommand())
                 {
                     Title = "Not logged in",
-                    Icon = new IconInfo("\uE949"),
+                    Icon = Icons.CalculatorSubtract,
                 },
             ];
         }

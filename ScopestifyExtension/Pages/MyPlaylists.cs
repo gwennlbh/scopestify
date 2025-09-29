@@ -19,7 +19,7 @@ internal sealed partial class MyPlaylists : ListPage
     public MyPlaylists(FullTrack? trackToAdd)
     {
         Id = "my_playlists";
-        Icon = new("\uE90B");
+        Icon = Icons.Playlist;
         Title = "Play and manage your playlists";
         Name = "My Playlists";
         ShowDetails = true;
@@ -43,7 +43,7 @@ internal sealed partial class MyPlaylists : ListPage
             )
             {
                 Subtitle = "Updates every Monday",
-                Tags = [new Tag("Automatic") { Icon = new IconInfo("\uE895") }],
+                Tags = [new Tag("Automatic") { Icon = Icons.Sync }],
                 Command = new NoOpCommand(),
                 MoreCommands =
                 [
@@ -61,7 +61,7 @@ internal sealed partial class MyPlaylists : ListPage
             )
             {
                 Subtitle = "Updates every Friday",
-                Tags = [new Tag("Automatic") { Icon = new IconInfo("\uE895") }],
+                Tags = [new Tag("Automatic") { Icon = Icons.Sync }],
                 Command = new NoOpCommand(),
                 MoreCommands =
                 [
@@ -98,7 +98,7 @@ internal sealed partial class MyPlaylists : ListPage
                     )
                     {
                         Title = "Play playlist",
-                        Icon = new IconInfo("\uE768"),
+                        Icon = Icons.Play,
                     },
                     new CommandContextItem(
                         new Commands.PlayPlaylist(
@@ -109,7 +109,7 @@ internal sealed partial class MyPlaylists : ListPage
                     )
                     {
                         Title = "Add to queue",
-                        Icon = new IconInfo("\uE710"),
+                        Icon = Icons.Import,
                     },
                     new CommandContextItem(new OpenUrlCommand(playlist.Uri ?? ""))
                     {

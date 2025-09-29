@@ -17,7 +17,7 @@ internal sealed partial class RegisterApp : ContentPage
     {
         Name = "Open";
         Title = "Sample Content";
-        Icon = new IconInfo("\uECA5"); // Tiles
+        Icon = Icons.Tiles;
     }
 }
 

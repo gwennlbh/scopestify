@@ -9,7 +9,7 @@ namespace ScopestifyExtension.Commands;
 sealed partial class PlayPlaylist(string uri, string name, bool? enqueue) : InvokableCommand
 {
     public override string Name => enqueue ? "Add playlist's tracks to queue" : "Play playlist";
-    public override IconInfo Icon => new("\uE768");
+    public override IconInfo Icon => enqueue ? Icons.Import : Icons.Play;
 
     private readonly SpotifyClient spotify = AuthenticatedSpotifyClient.Get();
 

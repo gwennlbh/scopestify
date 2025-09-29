@@ -32,12 +32,12 @@ public partial class PlaylistItem : ListItem
             }.Where(s => !string.IsNullOrEmpty(s))
         );
 
-        Icon = new IconInfo(playlist?.Images?.FirstOrDefault()?.Url ?? "\uF147");
+        Icon = Icons.WithFallback(playlist?.Images?.FirstOrDefault()?.Url, Icons.Playlist);
 
-        Tags = typeTag ? [new Tag("Playlist") { Icon = new IconInfo("\uE90B") }] : [];
+        Tags = typeTag ? [new Tag("Playlist") { Icon = Icons.Playlist }] : [];
         if (highlightYours && playlist?.Owner?.Id == currentUser?.Id)
         {
-            Tags = [.. Tags, new Tag("Yours") { Icon = new IconInfo("\uE77B") }];
+            Tags = [.. Tags, new Tag("Yours") { Icon = Icons.You }];
         }
 
         MoreCommands =
@@ -51,14 +51,14 @@ public partial class PlaylistItem : ListItem
             )
             {
                 Title = "Add to queue",
-                Icon = new IconInfo("\uE710"),
+                Icon = Icons.Import,
             },
             new CommandContextItem(
                 new Commands.AddToPlaylist(playlist?.Id ?? "", playlist?.Name ?? "")
             )
             {
                 Title = "Add current track",
-                Icon = new IconInfo("\uE8B5"),
+                Icon = Icons.Add,
             },
         ];
 
@@ -66,7 +66,7 @@ public partial class PlaylistItem : ListItem
         {
             Title = playlist?.Name ?? "Unnamed playlist",
             Body = playlist?.Description ?? "No description",
-            HeroImage = new IconInfo(playlist?.Images?.FirstOrDefault()?.Url ?? "\uF147"),
+            HeroImage = Icon,
             Metadata =
             [
                 new DetailsElement

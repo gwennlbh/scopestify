@@ -9,7 +9,7 @@ namespace ScopestifyExtension.Commands;
 internal sealed partial class Login : InvokableCommand
 {
     public override string Name => "Login to Spotify";
-    public override IconInfo Icon => new("\uE8D7");
+    public override IconInfo Icon => Icons.Permissions;
 
     private static PrivateUser? user;
     private static string errorMessage = "";

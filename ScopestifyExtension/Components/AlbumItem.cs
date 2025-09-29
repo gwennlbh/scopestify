@@ -15,8 +15,8 @@ public partial class AlbumItem : ListItem
         );
         Title = album.Name ?? "Unnamed album";
         Subtitle = Utils.Text.Artists(new FullTrack { Artists = album.Artists });
-        Icon = new IconInfo(album.Images?.FirstOrDefault()?.Url ?? "\uE7C3");
-        Tags = typeTag ? [new Tag("Album") { Icon = new IconInfo("\uE93C") }] : [];
+        Icon = Icons.WithFallback(album.Images?.FirstOrDefault()?.Url, Icons.MusicAlbum);
+        Tags = typeTag ? [new Tag("Album") { Icon = Icons.MusicAlbum }] : [];
         MoreCommands =
         [
             new CommandContextItem(
@@ -24,7 +24,7 @@ public partial class AlbumItem : ListItem
             )
             {
                 Title = "Add to queue",
-                Icon = new IconInfo("\uE710"),
+                Icon = Icons.Import,
             },
             new CommandContextItem(new OpenUrlCommand(album.Uri ?? ""))
             {
@@ -35,7 +35,7 @@ public partial class AlbumItem : ListItem
         {
             Title = album.Name ?? "Unnamed album",
             Body = $"Album by {Utils.Text.Artists(new FullTrack { Artists = album.Artists })}",
-            HeroImage = new IconInfo(album.Images?.FirstOrDefault()?.Url ?? "\uE7C3"),
+            HeroImage = Icon,
             Metadata =
             [
                 new DetailsElement

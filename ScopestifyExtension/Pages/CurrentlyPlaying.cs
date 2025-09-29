@@ -11,7 +11,7 @@ internal sealed partial class CurrentlyPlaying : ListPage
 {
     public override string Name => "Current Track";
     public override string Title => "Currently playing track";
-    public override IconInfo Icon => new("\uE8D6");
+    public override IconInfo Icon => Icons.MusicNote;
     public override bool ShowDetails => true;
 
     private FullTrack? currentTrack;
@@ -48,7 +48,10 @@ internal sealed partial class CurrentlyPlaying : ListPage
 
         var details = new Details
         {
-            HeroImage = new IconInfo(currentTrack.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F"),
+            HeroImage = Icons.WithFallback(
+                currentTrack.Album?.Images?.FirstOrDefault()?.Url,
+                Icons.MusicNote
+            ),
             Title = currentTrack.Name ?? "Unnamed track",
             Body = Utils.Text.Artists(currentTrack),
             Metadata =
@@ -100,7 +103,6 @@ internal sealed partial class CurrentlyPlaying : ListPage
             },
             new ListItem(new OpenUrlCommand(currentTrack.Album.Uri ?? ""))
             {
-                Icon = new IconInfo("\uE93C"),
                 Title = "Open album",
                 Subtitle = string.Join(
                     " • ",
@@ -125,13 +127,14 @@ internal sealed partial class CurrentlyPlaying : ListPage
                 new OpenUrlCommand(artists.FirstOrDefault()?.Uri ?? "")
                 {
                     Name = $"See {artists.FirstOrDefault()?.Name}",
-                    Icon = new IconInfo(
-                        artists.FirstOrDefault()?.Images?.FirstOrDefault()?.Url ?? "\uE77B"
+                    Icon = Icons.WithFallback(
+                        artists.FirstOrDefault()?.Images?.FirstOrDefault()?.Url,
+                        Icons.Artist
                     ),
                 }
             )
             {
-                Icon = new IconInfo("\uE716"),
+                Icon = artists.Length > 1 ? Icons.Group : Icons.Artist,
                 Title = "See artists",
                 Subtitle = Utils.Text.Artists(currentTrack),
                 Details = details,
@@ -144,7 +147,10 @@ internal sealed partial class CurrentlyPlaying : ListPage
                         )
                         {
                             Title = $"See {artist.Name}",
-                            Icon = new IconInfo(artist.Images?.FirstOrDefault()?.Url ?? "\uE77B"),
+                            Icon = Icons.WithFallback(
+                                artist.Images?.FirstOrDefault()?.Url,
+                                Icons.Artist
+                            ),
                         }),
                 ],
             },

@@ -16,8 +16,9 @@ public partial class TrackItem : ListItem
         );
         Title = track.Name ?? "Unnamed track";
         Subtitle = string.Join(" • ", [Utils.Text.Artists(track), track.Album?.Name ?? "No album"]);
-        Icon = new IconInfo(track.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F");
-        Tags = typeTag ? [new Tag("Track") { Icon = new IconInfo("\uEC4F") }] : [];
+        Icon = Icons.WithFallback(track.Album?.Images?.FirstOrDefault()?.Url, Icons.MusicNote);
+
+        Tags = typeTag ? [new Tag("Track") { Icon = Icons.MusicNote }] : [];
         MoreCommands =
         [
             new CommandContextItem(
@@ -25,7 +26,6 @@ public partial class TrackItem : ListItem
             )
             {
                 Title = "Add to queue",
-                Icon = new IconInfo("\uE710"),
             },
             new CommandContextItem(new OpenUrlCommand(track.Uri ?? ""))
             {
@@ -37,7 +37,6 @@ public partial class TrackItem : ListItem
             },
             new CommandContextItem(new OpenUrlCommand(track.Album?.Uri ?? ""))
             {
-                Icon = new IconInfo("\uE93C"),
                 Title =
                     track.Album?.Name == track.Name
                         ? "Open album in Spotify"
@@ -46,7 +45,7 @@ public partial class TrackItem : ListItem
         ];
         Details = new Details
         {
-            HeroImage = new IconInfo(track.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F"),
+            HeroImage = Icon,
             Title = track.Name ?? "Unnamed track",
             Body = Utils.Text.Artists(track),
             Metadata =
