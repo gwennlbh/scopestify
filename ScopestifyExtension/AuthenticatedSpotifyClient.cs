@@ -13,6 +13,7 @@ class AuthenticatedSpotifyClient
     private static PrivateUser? user;
     private static string errorMessage = "";
 
+    // TODO make this configurable?
     public static Uri callbackUri = new("http://localhost:5543/callback");
 
     public static SpotifyClient Get()
