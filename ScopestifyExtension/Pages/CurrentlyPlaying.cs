@@ -92,7 +92,7 @@ internal sealed partial class CurrentlyPlaying : ListPage
                     : "Add to your Liked Songs",
                 Details = details,
             },
-            new ListItem(new Commands.NavigateTo(new MyPlaylists()))
+            new ListItem(new MyPlaylists(trackToAdd: currentTrack))
             {
                 Title = "Add to a playlist",
                 Subtitle = "Add the current track to one of your playlists",

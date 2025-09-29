@@ -1,11 +1,12 @@
 namespace ScopestifyExtension.Utils;
 
+using System;
 using System.Linq;
 using SpotifyAPI.Web;
 
 public class Text
 {
-    public static string Artists(FullTrack? track)
+    public static string Artists(SimpleTrack? track)
     {
         if (track == null)
         {
@@ -15,7 +16,12 @@ public class Text
         return string.Join(" × ", track.Artists?.Select(a => a.Name) ?? []);
     }
 
-    public static string TrackFullName(FullTrack? track)
+    public static string Artists(FullTrack? track)
+    {
+        return Artists(track == null ? null : new SimpleTrack { Artists = track.Artists });
+    }
+
+    public static string TrackFullName(SimpleTrack? track)
     {
         if (track == null)
         {
@@ -25,10 +31,17 @@ public class Text
         return $"{Artists(track)} – {track.Name}";
     }
 
+    public static string TrackFullName(FullTrack? track)
+    {
+        return TrackFullName(
+            track == null ? null : new SimpleTrack { Artists = track.Artists, Name = track.Name }
+        );
+    }
+
     public static string AlbumFullName(FullAlbum? album)
     {
         return AlbumFullName(
-            album == null ? null : new FullAlbum { Artists = album.Artists, Name = album.Name }
+            album == null ? null : new SimpleAlbum { Artists = album.Artists, Name = album.Name }
         );
     }
 

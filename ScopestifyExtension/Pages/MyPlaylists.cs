@@ -14,13 +14,17 @@ internal sealed partial class MyPlaylists : ListPage
     private FullPlaylist[] playlists = [];
     private PrivateUser? currentUser;
 
-    public MyPlaylists()
+    private FullTrack? trackToAdd;
+
+    public MyPlaylists(FullTrack? trackToAdd)
     {
         Id = "my_playlists";
         Icon = new("\uE90B");
-        Title = "Play a playlist or add current track to a playlist";
+        Title = "Play and manage your playlists";
         Name = "My Playlists";
         ShowDetails = true;
+
+        this.trackToAdd = trackToAdd;
 
         Task.Run(LoadData).Wait();
     }
@@ -75,7 +79,14 @@ internal sealed partial class MyPlaylists : ListPage
             )
             {
                 Subtitle = $"{playlist.Tracks?.Total ?? 0} tracks",
-                Command = new Commands.AddToPlaylist(playlist.Id ?? "", playlist.Name ?? ""),
+                Command = new Commands.AddToPlaylist(
+                    playlist.Id ?? "",
+                    playlist.Name ?? "",
+                    trackId: trackToAdd?.Id
+                )
+                {
+                    Name = trackToAdd != null ? $"Add {trackToAdd.Name}" : $"Add current track",
+                },
                 MoreCommands =
                 [
                     new CommandContextItem(
