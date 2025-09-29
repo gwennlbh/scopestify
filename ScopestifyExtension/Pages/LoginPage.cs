@@ -111,11 +111,13 @@ internal sealed partial class LoginPage : ListPage
             var spotify = AuthenticatedSpotifyClient.Get();
             currentUser = await spotify.UserProfile.Current();
             var devices = await spotify.Player.GetCurrentPlayback();
-            currentDevice = devices.Device;
+            currentDevice = devices?.Device;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            currentUser = null;
+            new ToastStatusMessage(
+                new StatusMessage { Message = ex.InnerException?.Message ?? ex.Message }
+            ).Show();
         }
     }
 }
