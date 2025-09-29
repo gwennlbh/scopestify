@@ -34,10 +34,10 @@ public partial class PlaylistItem : ListItem
 
         Icon = new IconInfo(playlist?.Images?.FirstOrDefault()?.Url ?? "\uF147");
 
-        Tag[] tags = typeTag ? [new Tag("Playlist") { Icon = new IconInfo("\uE90B") }] : [];
+        Tags = typeTag ? [new Tag("Playlist") { Icon = new IconInfo("\uE90B") }] : [];
         if (highlightYours && playlist?.Owner?.Id == currentUser?.Id)
         {
-            tags = [.. tags, new Tag("Yours") { Icon = new IconInfo("\uE77B") }];
+            Tags = [.. Tags, new Tag("Yours") { Icon = new IconInfo("\uE77B") }];
         }
 
         MoreCommands =
