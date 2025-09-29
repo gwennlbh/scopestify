@@ -1,23 +1,21 @@
+namespace ScopestifyExtension.Pages;
+
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
-using SpotifyAPI.Web.Http;
 
-namespace ScopestifyExtension;
 
-internal sealed partial class MyPlaylistsPage : ListPage
+internal sealed partial class MyPlaylists : ListPage
 {
     private FullPlaylist[] playlists = [];
     private PrivateUser? currentUser;
 
-    public MyPlaylistsPage()
+    public MyPlaylists()
     {
         Id = "my_playlists";
         Icon = new("\uE90B");
@@ -78,11 +76,11 @@ internal sealed partial class MyPlaylistsPage : ListPage
             )
             {
                 Subtitle = $"{playlist.Tracks?.Total ?? 0} tracks",
-                Command = new AddToPlaylistCommand(playlist.Id ?? "", playlist.Name ?? ""),
+                Command = new Commands.AddToPlaylist(playlist.Id ?? "", playlist.Name ?? ""),
                 MoreCommands =
                 [
                     new CommandContextItem(
-                        new PlayPlaylistCommand(
+                        new Commands.PlayPlaylist(
                             playlist?.Uri ?? "",
                             playlist?.Name ?? "",
                             enqueue: false
@@ -93,7 +91,7 @@ internal sealed partial class MyPlaylistsPage : ListPage
                         Icon = new IconInfo("\uE768"),
                     },
                     new CommandContextItem(
-                        new PlayPlaylistCommand(
+                        new Commands.PlayPlaylist(
                             playlist?.Uri ?? "",
                             playlist?.Name ?? "",
                             enqueue: true

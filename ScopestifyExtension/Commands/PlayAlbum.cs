@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
 
-namespace ScopestifyExtension;
+namespace ScopestifyExtension.Commands;
 
-sealed partial class PlayPlaylistCommand(string uri, string name, bool? enqueue) : InvokableCommand
+sealed partial class PlayAlbum(string uri, string name, bool? enqueue) : InvokableCommand
 {
-    public override string Name => enqueue ? "Add playlist's tracks to queue" : "Play playlist";
+    public override string Name => enqueue ? "Add album's tracks to queue" : "Play album";
     public override IconInfo Icon => new("\uE768");
 
     private readonly SpotifyClient spotify = AuthenticatedSpotifyClient.Get();
@@ -24,19 +24,12 @@ sealed partial class PlayPlaylistCommand(string uri, string name, bool? enqueue)
 
         if (enqueue && hasPlayback)
         {
-            var playlist = await spotify.Playlists.Get(uri.Split(':').Last());
-            var tracksPage = await spotify.Playlists.GetItems(playlist.Id);
-            var tracks =
-                tracksPage
-                    ?.Items?.Where(t => t.Track.Type == ItemType.Track)
-                    .Select(t => t.Track as FullTrack)
-                    .OrderBy(t => t?.TrackNumber)
-                    .ToArray() ?? [];
-
+            var album = await spotify.Albums.Get(uri.Split(':').Last());
+            var tracksPage = await spotify.Albums.GetTracks(album.Id);
+            var tracksAllPages = await spotify.PaginateAll(tracksPage);
+            var tracks = tracksAllPages?.OrderBy(t => t.TrackNumber).ToArray() ?? [];
             foreach (var track in tracks)
             {
-                if (track == null)
-                    continue;
                 await spotify.Player.AddToQueue(new PlayerAddToQueueRequest(track.Uri));
             }
             return;

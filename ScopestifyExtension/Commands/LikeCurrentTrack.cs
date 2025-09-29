@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
 
-namespace ScopestifyExtension;
+namespace ScopestifyExtension.Commands;
 
-internal sealed partial class LikeCurrentTrackCommand(bool remove = false) : InvokableCommand
+internal sealed partial class LikeCurrentTrack(bool remove = false) : InvokableCommand
 {
     public override string Name =>
         remove ? "Remove currently playing from liked tracks" : "Like current track";

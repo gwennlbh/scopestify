@@ -1,13 +1,11 @@
 using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
 
-namespace ScopestifyExtension;
+namespace ScopestifyExtension.Commands;
 
-sealed partial class PlayTrackCommand(
+sealed partial class PlayTrack(
     string uri,
     string name,
     string? contextUri = null,

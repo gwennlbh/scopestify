@@ -4,9 +4,9 @@ using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
 
-namespace ScopestifyExtension;
+namespace ScopestifyExtension.Commands;
 
-internal sealed partial class LoginCommand : InvokableCommand
+internal sealed partial class Login : InvokableCommand
 {
     public override string Name => "Login to Spotify";
     public override IconInfo Icon => new("\uE8D7");

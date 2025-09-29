@@ -1,18 +1,19 @@
+namespace ScopestifyExtension.Pages;
+
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
-using ScopestifyExtension;
 using SpotifyAPI.Web;
 
-internal sealed partial class RegisterAppFormPage : ContentPage
+internal sealed partial class RegisterApp : ContentPage
 {
     private readonly RegisterAppFormContent form = new();
 
     public override IContent[] GetContent() => [form];
 
-    public RegisterAppFormPage()
+    public RegisterApp()
     {
         Name = "Open";
         Title = "Sample Content";

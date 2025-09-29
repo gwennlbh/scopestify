@@ -16,7 +16,7 @@ public partial class PlaylistItem : ListItem
         var hasTracks = playlist.Tracks?.Total > 0;
 
         Command = hasTracks
-            ? new PlayPlaylistCommand(playlist?.Uri ?? "", playlist?.Name ?? "", enqueue: false)
+            ? new Commands.PlayPlaylist(playlist?.Uri ?? "", playlist?.Name ?? "", enqueue: false)
             : new NoOpCommand();
 
         Title = playlist?.Name ?? "Unnamed playlist";
@@ -47,14 +47,14 @@ public partial class PlaylistItem : ListItem
                 Title = "Open in Spotify",
             },
             new CommandContextItem(
-                new PlayPlaylistCommand(playlist?.Uri ?? "", playlist?.Name ?? "", enqueue: true)
+                new Commands.PlayPlaylist(playlist?.Uri ?? "", playlist?.Name ?? "", enqueue: true)
             )
             {
                 Title = "Add to queue",
                 Icon = new IconInfo("\uE710"),
             },
             new CommandContextItem(
-                new AddToPlaylistCommand(playlist?.Id ?? "", playlist?.Name ?? "")
+                new Commands.AddToPlaylist(playlist?.Id ?? "", playlist?.Name ?? "")
             )
             {
                 Title = "Add current track",

@@ -1,8 +1,8 @@
 using Microsoft.CommandPalette.Extensions.Toolkit;
 
-namespace ScopestifyExtension;
+namespace ScopestifyExtension.Commands;
 
-internal sealed partial class LogoutCommand : InvokableCommand
+internal sealed partial class Logout : InvokableCommand
 {
     public override string Name => "Logout from Spotify";
     public override IconInfo Icon => new("\uF3B1");

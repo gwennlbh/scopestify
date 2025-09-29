@@ -1,4 +1,4 @@
-namespace ScopestifyExtension;
+namespace ScopestifyExtension.Pages;
 
 using System;
 using System.Linq;
@@ -7,7 +7,7 @@ using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
 
-internal sealed partial class CurrentTrackPage : ListPage
+internal sealed partial class CurrentlyPlaying : ListPage
 {
     public override string Name => "Current Track";
     public override string Title => "Currently playing track";
@@ -18,7 +18,7 @@ internal sealed partial class CurrentTrackPage : ListPage
     private FullArtist[] artists = [];
     private bool liked;
 
-    public CurrentTrackPage()
+    public CurrentlyPlaying()
     {
         try
         {
@@ -84,7 +84,7 @@ internal sealed partial class CurrentTrackPage : ListPage
 
         return
         [
-            new ListItem(new LikeCurrentTrackCommand(remove: liked))
+            new ListItem(new Commands.LikeCurrentTrack(remove: liked))
             {
                 Title = liked ? "Remove from liked tracks" : "Like track",
                 Subtitle = liked
@@ -92,7 +92,7 @@ internal sealed partial class CurrentTrackPage : ListPage
                     : "Add to your Liked Songs",
                 Details = details,
             },
-            new ListItem(new NavigateCommand(new MyPlaylistsPage()))
+            new ListItem(new Commands.NavigateTo(new MyPlaylists()))
             {
                 Title = "Add to a playlist",
                 Subtitle = "Add the current track to one of your playlists",
@@ -113,7 +113,7 @@ internal sealed partial class CurrentTrackPage : ListPage
                 MoreCommands =
                 [
                     new CommandContextItem(
-                        new PlayAlbumCommand(
+                        new Commands.PlayAlbum(
                             currentTrack.Album?.Uri ?? "",
                             Utils.Text.AlbumFullName(currentTrack.Album),
                             enqueue: true

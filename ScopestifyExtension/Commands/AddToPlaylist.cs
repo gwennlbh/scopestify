@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
 
-namespace ScopestifyExtension;
+namespace ScopestifyExtension.Commands;
 
 /// <summary>
 /// Add the currently playing track to the specified playlist
@@ -12,7 +12,7 @@ namespace ScopestifyExtension;
 /// <param name="playlistId"></param>
 /// <param name="name"></param>
 /// <param name="trackId">If not specified, defaults to the currently playing track</param>
-internal sealed partial class AddToPlaylistCommand(
+internal sealed partial class AddToPlaylist(
     string playlistId,
     string name,
     string? trackId = null

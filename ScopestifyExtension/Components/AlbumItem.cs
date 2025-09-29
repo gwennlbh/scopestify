@@ -8,7 +8,7 @@ public partial class AlbumItem : ListItem
 {
     public AlbumItem(SimpleAlbum album, bool typeTag)
     {
-        Command = new PlayAlbumCommand(album.Uri, Utils.Text.AlbumFullName(album), enqueue: false);
+        Command = new Commands.PlayAlbum(album.Uri, Utils.Text.AlbumFullName(album), enqueue: false);
         Title = album.Name ?? "Unnamed album";
         Subtitle = Utils.Text.Artists(new FullTrack { Artists = album.Artists });
         Icon = new IconInfo(album.Images?.FirstOrDefault()?.Url ?? "\uE7C3");
@@ -16,7 +16,7 @@ public partial class AlbumItem : ListItem
         MoreCommands =
         [
             new CommandContextItem(
-                new PlayAlbumCommand(album.Uri, Utils.Text.AlbumFullName(album), enqueue: true)
+                new Commands.PlayAlbum(album.Uri, Utils.Text.AlbumFullName(album), enqueue: true)
             )
             {
                 Title = "Add to queue",

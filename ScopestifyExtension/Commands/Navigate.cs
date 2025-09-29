@@ -1,6 +1,8 @@
+namespace ScopestifyExtension.Commands;
+
 using Microsoft.CommandPalette.Extensions.Toolkit;
 
-internal sealed partial class NavigateCommand(ListPage page) : InvokableCommand
+internal sealed partial class NavigateTo(ListPage page) : InvokableCommand
 {
     public override string Name => $"Go to {page.Name}";
     public override IconInfo Icon => page.Icon;

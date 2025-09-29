@@ -1,16 +1,17 @@
+namespace ScopestifyExtension.Pages;
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
-using ScopestifyExtension;
 using SpotifyAPI.Web;
 
-internal sealed partial class LoginPage : ListPage
+internal sealed partial class Authenticate : ListPage
 {
     private PrivateUser? currentUser;
     private Device? currentDevice;
 
-    public LoginPage()
+    public Authenticate()
     {
         Name = "Authenticate to Spotify";
         Icon = new("\uE8D7");
@@ -51,7 +52,7 @@ internal sealed partial class LoginPage : ListPage
             items =
             [
                 .. items,
-                new ListItem(new LoginCommand())
+                new ListItem(new Commands.Login())
                 {
                     Title = "Login to Spotify",
                     Subtitle = "After having registered your App's credentials",
@@ -62,7 +63,7 @@ internal sealed partial class LoginPage : ListPage
         items =
         [
             .. items,
-            new ListItem(new RegisterAppFormPage())
+            new ListItem(new RegisterApp())
             {
                 Title = "Register your App",
                 Subtitle = $"Secrets are stored at {ConfigurationFile.Path()}",

@@ -1,4 +1,4 @@
-namespace ScopestifyExtension;
+namespace ScopestifyExtension.Pages;
 
 using System;
 using System.Diagnostics;
@@ -9,7 +9,7 @@ using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
 
-internal sealed partial class SearchPage : DynamicListPage, IDisposable
+internal sealed partial class Search : DynamicListPage, IDisposable
 {
     private readonly SpotifyClient spotify = AuthenticatedSpotifyClient.Get();
 
@@ -29,7 +29,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
 
     private bool showTypes = true;
 
-    public SearchPage()
+    public Search()
     {
         Name = "Search on Spotify";
         Icon = new("\uE721");
