@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
@@ -24,14 +26,22 @@ sealed partial class PlayTrackCommand(
 
     private async Task Run()
     {
-        if (enqueue)
+        var hasPlayback = await Utils.Playback.HasPlaybackContext(spotify);
+        var deviceToPlayOn = await Utils.Devices.GetDeviceToStartPlaybackOn(spotify);
+
+        if (enqueue && hasPlayback)
         {
             await spotify.Player.AddToQueue(new PlayerAddToQueueRequest(uri));
         }
         else
         {
             await spotify.Player.ResumePlayback(
-                new PlayerResumePlaybackRequest { Uris = [uri], ContextUri = contextUri }
+                new PlayerResumePlaybackRequest
+                {
+                    Uris = [uri],
+                    ContextUri = contextUri,
+                    DeviceId = hasPlayback ? null : deviceToPlayOn.Id,
+                }
             );
         }
     }

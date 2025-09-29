@@ -19,7 +19,10 @@ sealed partial class PlayPlaylistCommand(string uri, string name, bool? enqueue)
 
     private async Task Run()
     {
-        if (enqueue)
+        var hasPlayback = await Utils.Playback.HasPlaybackContext(spotify);
+        var deviceToPlayOn = await Utils.Devices.GetDeviceToStartPlaybackOn(spotify);
+
+        if (enqueue && hasPlayback)
         {
             var playlist = await spotify.Playlists.Get(uri.Split(':').Last());
             var tracksPage = await spotify.Playlists.GetItems(playlist.Id);
@@ -41,7 +44,11 @@ sealed partial class PlayPlaylistCommand(string uri, string name, bool? enqueue)
         else
         {
             await spotify.Player.ResumePlayback(
-                new PlayerResumePlaybackRequest { ContextUri = uri }
+                new PlayerResumePlaybackRequest
+                {
+                    ContextUri = uri,
+                    DeviceId = hasPlayback ? null : deviceToPlayOn.Id,
+                }
             );
         }
     }
