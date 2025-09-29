@@ -9,7 +9,11 @@ public partial class TrackItem : ListItem
 {
     public TrackItem(FullTrack track, bool typeTag)
     {
-        Command = new Commands.PlayTrack(track.Uri, Utils.Text.TrackFullName(track), enqueue: false);
+        Command = new Commands.PlayTrack(
+            track.Uri,
+            Utils.Text.TrackFullName(track),
+            enqueue: false
+        );
         Title = track.Name ?? "Unnamed track";
         Subtitle = string.Join(" • ", [Utils.Text.Artists(track), track.Album?.Name ?? "No album"]);
         Icon = new IconInfo(track.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F");

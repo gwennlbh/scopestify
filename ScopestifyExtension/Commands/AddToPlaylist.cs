@@ -12,11 +12,8 @@ namespace ScopestifyExtension.Commands;
 /// <param name="playlistId"></param>
 /// <param name="name"></param>
 /// <param name="trackId">If not specified, defaults to the currently playing track</param>
-internal sealed partial class AddToPlaylist(
-    string playlistId,
-    string name,
-    string? trackId = null
-) : InvokableCommand
+internal sealed partial class AddToPlaylist(string playlistId, string name, string? trackId = null)
+    : InvokableCommand
 {
     public override string Name => "Add current track";
     public override IconInfo Icon => new("\uF147");

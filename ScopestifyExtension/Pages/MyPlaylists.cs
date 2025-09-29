@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using SpotifyAPI.Web;
 
-
 internal sealed partial class MyPlaylists : ListPage
 {
     private FullPlaylist[] playlists = [];
