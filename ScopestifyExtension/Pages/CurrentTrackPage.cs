@@ -171,7 +171,7 @@ internal sealed partial class CurrentTrackPage : ListPage
             new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track)
         );
 
-        if (currentTrack == null)
+        if (playback.Item == null)
         {
             return;
         }
