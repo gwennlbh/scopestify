@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 
+namespace ScopestifyExtension;
+
 public class ConfigurationFile
 {
     private IConfiguration? config;
