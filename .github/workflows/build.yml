@@ -9,121 +9,47 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-env:
-  SOLUTION_FILE_PATH: ./ScopestifyExtension.sln
-  PROJECT_FILE_PATH: ./ScopestifyExtension/ScopestifyExtension.csproj
-  BUILD_CONFIGURATION: Release
-
 jobs:
   build:
-    runs-on: windows-latest
     strategy:
       matrix:
-        include:
-          - platform: x86
-            runtime: win-x86
-
+        configuration: [Release]
+        platform: [x64, arm64]
+        os: [windows-latest, windows-11-arm]
+        exclude:
+        - os: windows-latest
+          platform: arm64
+        - os: windows-11-arm
+          platform: x64
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
+    - uses: actions/checkout@v4
+      with:
+        clean: true
 
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v2
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.305'
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+      with:
+        vs-version: '17.5'
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '9.0.x'
+    - name: Download nuget
+      run: |
+        mkdir ".\.nuget"
+        Invoke-WebRequest "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -OutFile ".\.nuget\nuget.exe"
 
-      - name: Restore NuGet packages
-        run: dotnet restore ${{ env.SOLUTION_FILE_PATH }}
+    - name: Find VsDevCmd.bat
+      run: |
+        $VSDevCmd = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere" -latest -find Common7\tools\VSDevCmd.bat
+        if (!$VSDevCmd) { exit 1 }
+        echo "Using VSDevCmd: ${VSDevCmd}"
+        Add-Content $env:GITHUB_ENV "VSDevCmd=$VSDevCmd"
 
-      - name: Build and publish with dotnet
-        run: |
-          dotnet publish ${{ env.PROJECT_FILE_PATH }} `
-            -c ${{ env.BUILD_CONFIGURATION }} `
-            -r ${{ matrix.runtime }} `
-            --self-contained true `
-            -p:PublishSingleFile=false `
-            -p:PublishReadyToRun=true `
-            -p:Platform=${{ matrix.platform }}
-        shell: powershell
+    - name: Restore dependencies
+      run: dotnet restore ScopestifyExtension.sln -p:PublishReadyToRun=true
 
-      - name: Create MSIX package using MSBuild
-        run: |
-          msbuild ${{ env.PROJECT_FILE_PATH }} `
-            /p:Configuration=${{ env.BUILD_CONFIGURATION }} `
-            /p:Platform=${{ matrix.platform }} `
-            /p:UapAppxPackageBuildMode=StoreUpload `
-            /p:AppxBundle=Always `
-            /p:AppxBundlePlatforms=${{ matrix.platform }}
-        shell: powershell
-
-      - name: Create artifact directory
-        run: |
-          New-Item -Path ".\artifacts\${{ matrix.platform }}" `
-            -ItemType Directory -Force
-        shell: powershell
-
-      - name: Copy published outputs
-        run: |
-          $publishPath = ".\ScopestifyExtension\bin\" +
-            "${{ env.BUILD_CONFIGURATION }}\net9.0-windows10.0.22621.0\" +
-            "\${{ matrix.runtime }}\publish"
-          $destPath = ".\artifacts\${{ matrix.platform }}\publish"
-          if (Test-Path $publishPath) {
-            Copy-Item -Path $publishPath -Destination $destPath `
-              -Recurse -Force
-            Write-Output "Copied published files from $publishPath"
-          } else {
-            Write-Warning "Publish path not found: $publishPath"
-          }
-        shell: powershell
-
-      - name: Copy MSIX packages
-        run: |
-          $msixBasePath = ".\ScopestifyExtension\bin\" +
-            "${{ matrix.platform }}\${{ env.BUILD_CONFIGURATION }}"
-          $appxUploadPath = ".\ScopestifyExtension\AppPackages"
-          $destPath = ".\artifacts\${{ matrix.platform }}\packages"
-          New-Item -Path $destPath -ItemType Directory -Force
-
-          # Copy individual MSIX files if they exist
-          $msixFiles = Get-ChildItem -Path $msixBasePath `
-            -Filter "*.msix" -ErrorAction SilentlyContinue
-          if ($msixFiles) {
-            Copy-Item -Path $msixFiles.FullName -Destination $destPath -Force
-            Write-Output "Copied MSIX files: $($msixFiles.Name -join ', ')"
-          }
-
-          # Copy AppPackages if they exist
-          if (Test-Path $appxUploadPath) {
-            Copy-Item -Path "$appxUploadPath\*" -Destination $destPath `
-              -Recurse -Force
-            Write-Output "Copied AppPackages from $appxUploadPath"
-          }
-        shell: powershell
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: scopestify-extension-${{ matrix.platform }}
-          path: ./artifacts/${{ matrix.platform }}/
-          retention-days: 30
-
-  build-summary:
-    needs: build
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Build Summary
-        run: |
-          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "Built for architecture: x86" >> $GITHUB_STEP_SUMMARY
-          echo "Configuration: Release" >> $GITHUB_STEP_SUMMARY
-          echo "Artifacts uploaded with 30-day retention" \
-            >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Artifacts Generated" >> $GITHUB_STEP_SUMMARY
-          echo "- scopestify-extension-x86" \
-            "(x86 build + MSIX packages)" >> $GITHUB_STEP_SUMMARY
+    - name: Build
+      run: cmd /c "$env:VSDevCmd" "&" msbuild /p:Configuration=${{ matrix.configuration }},Platform=${{ matrix.platform }} /restore ScopestifyExtension.sln
