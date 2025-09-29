@@ -170,6 +170,11 @@ internal sealed partial class CurrentTrackPage : ListPage
             new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track)
         );
 
+        if (currentTrack == null)
+        {
+            return;
+        }
+
         currentTrack = playback.Item as FullTrack;
 
         liked = await spotify
