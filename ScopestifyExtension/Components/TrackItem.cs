@@ -36,6 +36,13 @@ public partial class TrackItem : ListItem
             {
                 Title = "Add to Liked Songs",
             },
+            new CommandContextItem(new Pages.AlbumTracks(track.Id)) { Title = "See album tracks" },
+            // TODO causes wayy to many data fetches, MyPlaylists' data should be cached
+            // new CommandContextItem(new Pages.MyPlaylists(trackToAdd: track))
+            // {
+            //     Title = "Add to a playlist",
+            //     Icon = Icons.Add,
+            // },
             new CommandContextItem(new OpenUrlCommand(track.Album?.Uri ?? ""))
             {
                 Title =
@@ -75,4 +82,41 @@ public partial class TrackItem : ListItem
             ],
         };
     }
+
+    public TrackItem(SimpleTrack track, SimpleAlbum album, bool typeTag)
+        : this(
+            new FullTrack
+            {
+                Artists = track.Artists,
+                Album = album,
+                Name = track.Name,
+                Uri = track.Uri,
+                Id = track.Id,
+                DurationMs = track.DurationMs,
+                TrackNumber = track.TrackNumber,
+            },
+            typeTag
+        ) { }
+
+    public TrackItem(SimpleTrack track, FullAlbum album, bool typeTag)
+        : this(
+            new FullTrack
+            {
+                Artists = track.Artists,
+                Album = new SimpleAlbum
+                {
+                    Name = album.Name,
+                    Uri = album.Uri,
+                    Id = album.Id,
+                    Images = album.Images,
+                    Artists = album.Artists,
+                },
+                Name = track.Name,
+                Uri = track.Uri,
+                Id = track.Id,
+                DurationMs = track.DurationMs,
+                TrackNumber = track.TrackNumber,
+            },
+            typeTag
+        ) { }
 }

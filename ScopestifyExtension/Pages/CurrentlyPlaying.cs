@@ -99,9 +99,14 @@ internal sealed partial class CurrentlyPlaying : ListPage
                 Subtitle = "Add the current track to one of your playlists",
                 Details = details,
             },
-            new ListItem(new OpenUrlCommand(currentTrack.Album.Uri ?? ""))
+            new ListItem(
+                new AlbumTracks(
+                    currentTrack.Id,
+                    tagInList: new Tag("Playing") { Icon = Icons.VolumeBars }
+                )
+            )
             {
-                Title = "Open album",
+                Title = "See album",
                 Subtitle = Utils.Text.InfoLine(
                     currentTrack.Album?.Name ?? "Unknown album",
                     $"{currentTrack.Album.TotalTracks} tracks"
@@ -116,6 +121,10 @@ internal sealed partial class CurrentlyPlaying : ListPage
                             enqueue: true
                         )
                     ),
+                    new CommandContextItem(new OpenUrlCommand(currentTrack.Album?.Uri ?? ""))
+                    {
+                        Title = "Open in Spotify",
+                    },
                 ],
             },
             new ListItem(
