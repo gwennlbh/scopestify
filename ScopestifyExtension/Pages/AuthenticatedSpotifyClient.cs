@@ -27,6 +27,10 @@ class AuthenticatedSpotifyClient
             Debug.WriteLine(
                 $"Token created at {tokenCreatedAt} expires in {tokenExpiresIn} seconds"
             );
+
+            // Refresh the access token if needed
+            Task.Run(EnsureAccessTokenIsFresh).Wait();
+
             return new SpotifyClient(
                 SpotifyClientConfig
                     .CreateDefault()
@@ -59,6 +63,57 @@ class AuthenticatedSpotifyClient
         // Just blank out the saved access_token from the file
         var config = new ConfigurationFile { AccessToken = "" };
         config.Save();
+    }
+
+    public static async Task<string> EnsureAccessTokenIsFresh()
+    {
+        var config = new ConfigurationFile();
+
+        var tokenCreatedAt = config.TokenCreatedAt;
+        var tokenExpiresIn = config.TokenExpiresIn;
+
+        if (tokenCreatedAt != null && tokenExpiresIn != null)
+        {
+            var tokenAge = DateTime.Now - tokenCreatedAt.Value;
+            Debug.WriteLine($"Token age is {tokenAge.TotalSeconds} seconds");
+
+            // If token expires in less than 5 seconds, refresh it
+            if (tokenExpiresIn.Value - tokenAge.TotalSeconds < 5)
+            {
+                Debug.WriteLine("Refreshing access token...");
+
+                var oauth = new OAuthClient(SpotifyClientConfig.CreateDefault());
+                var newToken = await oauth.RequestToken(
+                    new AuthorizationCodeRefreshRequest(
+                        config.ClientId,
+                        config.ClientSecret,
+                        config.RefreshToken
+                    )
+                );
+
+                config.AccessToken = newToken.AccessToken;
+                config.RefreshToken = newToken.RefreshToken ?? config.RefreshToken;
+                config.TokenScopes = newToken.Scope;
+                config.TokenType = newToken.TokenType;
+                config.TokenExpiresIn = newToken.ExpiresIn;
+                config.TokenCreatedAt = newToken.CreatedAt;
+                config.Save();
+
+                return newToken.AccessToken;
+            }
+            else
+            {
+                Debug.WriteLine("Access token is still valid, no need to refresh.");
+            }
+        }
+        else
+        {
+            Debug.WriteLine(
+                $"Invalid refresh token params, expires_in={tokenExpiresIn}, created_at={tokenCreatedAt}"
+            );
+        }
+
+        return config.AccessToken;
     }
 
     public static async Task<(PrivateUser? user, string errorMessage)> LogIn()
