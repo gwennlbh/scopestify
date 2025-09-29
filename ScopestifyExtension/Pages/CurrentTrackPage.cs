@@ -1,9 +1,10 @@
+namespace ScopestifyExtension;
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
-using ScopestifyExtension;
 using SpotifyAPI.Web;
 
 internal sealed partial class CurrentTrackPage : ListPage
@@ -43,13 +44,13 @@ internal sealed partial class CurrentTrackPage : ListPage
         if (currentTrack == null)
             return [];
 
-        PlaceholderText = $"Currently playing {Utils.TrackFullName(currentTrack)}";
+        PlaceholderText = $"Currently playing {Utils.Text.TrackFullName(currentTrack)}";
 
         var details = new Details
         {
             HeroImage = new IconInfo(currentTrack.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F"),
             Title = currentTrack.Name ?? "Unnamed track",
-            Body = Utils.Artists(currentTrack),
+            Body = Utils.Text.Artists(currentTrack),
             Metadata =
             [
                 currentTrack.Album != null
@@ -132,7 +133,7 @@ internal sealed partial class CurrentTrackPage : ListPage
             {
                 Icon = new IconInfo("\uE716"),
                 Title = "See artists",
-                Subtitle = Utils.Artists(currentTrack),
+                Subtitle = Utils.Text.Artists(currentTrack),
                 Details = details,
                 MoreCommands =
                 [

@@ -62,7 +62,7 @@ internal sealed partial class AddToPlaylistCommand(
         if (alreadyInPlaylist)
         {
             throw new InvalidOperationException(
-                $"{Utils.TrackFullName(trackToAdd)} is already in {name}"
+                $"{Utils.Text.TrackFullName(trackToAdd)} is already in {name}"
             );
         }
 
@@ -83,7 +83,7 @@ internal sealed partial class AddToPlaylistCommand(
         {
             Task.Run(Run).Wait();
             return CommandResult.ShowToast(
-                new ToastArgs { Message = $"Added {Utils.TrackFullName(trackToAdd)} to {name}" }
+                new ToastArgs { Message = $"Added {Utils.Text.TrackFullName(trackToAdd)} to {name}" }
             );
         }
         catch (Exception ex)

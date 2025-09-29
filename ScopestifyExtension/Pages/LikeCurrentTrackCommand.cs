@@ -36,13 +36,13 @@ internal sealed partial class LikeCurrentTrackCommand(bool remove = false) : Inv
         if (savedTracks.Count > 0 && savedTracks[0] && !remove)
         {
             throw new InvalidOperationException(
-                $"Track {Utils.TrackFullName(currentTrack)} is already liked"
+                $"Track {Utils.Text.TrackFullName(currentTrack)} is already liked"
             );
         }
         else if (remove)
         {
             throw new InvalidOperationException(
-                $"Track {Utils.TrackFullName(currentTrack)} is not liked"
+                $"Track {Utils.Text.TrackFullName(currentTrack)} is not liked"
             );
         }
 
@@ -87,7 +87,7 @@ internal sealed partial class LikeCurrentTrackCommand(bool remove = false) : Inv
                         new ToastArgs
                         {
                             Message =
-                                $"Liked {Utils.TrackFullName(currentTrack)}, but failed to run post-like hook: {ex.Message}",
+                                $"Liked {Utils.Text.TrackFullName(currentTrack)}, but failed to run post-like hook: {ex.Message}",
                         }
                     );
                 }
@@ -97,8 +97,8 @@ internal sealed partial class LikeCurrentTrackCommand(bool remove = false) : Inv
                 new ToastArgs
                 {
                     Message = remove
-                        ? $"Removed {Utils.TrackFullName(currentTrack)} from liked tracks"
-                        : $"Liked {Utils.TrackFullName(currentTrack)}",
+                        ? $"Removed {Utils.Text.TrackFullName(currentTrack)} from liked tracks"
+                        : $"Liked {Utils.Text.TrackFullName(currentTrack)}",
                 }
             );
         }

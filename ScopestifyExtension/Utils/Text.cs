@@ -1,9 +1,9 @@
+namespace ScopestifyExtension.Utils;
+
 using System.Linq;
 using SpotifyAPI.Web;
 
-namespace ScopestifyExtension;
-
-public class Utils
+public class Text
 {
     public static string Artists(FullTrack? track)
     {

@@ -1,12 +1,12 @@
+namespace ScopestifyExtension;
+
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
-using ScopestifyExtension;
 using SpotifyAPI.Web;
 
 internal sealed partial class SearchPage : DynamicListPage, IDisposable
@@ -84,20 +84,24 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
         ListItem[] items =
         [
             .. tracks.Select(track => new ListItem(
-                new PlayTrackCommand(track.Uri, Utils.TrackFullName(track))
+                new PlayTrackCommand(track.Uri, Utils.Text.TrackFullName(track))
             )
             {
                 Title = track.Name ?? "Unnamed track",
                 Subtitle = string.Join(
                     " • ",
-                    [Utils.Artists(track), track.Album?.Name ?? "No album"]
+                    [Utils.Text.Artists(track), track.Album?.Name ?? "No album"]
                 ),
                 Icon = new IconInfo(track.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F"),
                 Tags = labelItemTypes ? [new Tag("Track") { Icon = new IconInfo("\uEC4F") }] : [],
                 MoreCommands =
                 [
                     new CommandContextItem(
-                        new PlayTrackCommand(track.Uri, Utils.TrackFullName(track), enqueue: true)
+                        new PlayTrackCommand(
+                            track.Uri,
+                            Utils.Text.TrackFullName(track),
+                            enqueue: true
+                        )
                     )
                     {
                         Title = "Add to queue",
@@ -122,7 +126,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                         track.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F"
                     ),
                     Title = track.Name ?? "Unnamed track",
-                    Body = Utils.Artists(track),
+                    Body = Utils.Text.Artists(track),
                     Metadata =
                     [
                         track.Album != null
@@ -156,7 +160,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
             )
             {
                 Title = album.Name ?? "Unnamed album",
-                Subtitle = Utils.Artists(new FullTrack { Artists = album.Artists }),
+                Subtitle = Utils.Text.Artists(new FullTrack { Artists = album.Artists }),
                 Icon = new IconInfo(album.Images?.FirstOrDefault()?.Url ?? "\uE7C3"),
                 Tags = labelItemTypes ? [new Tag("Album") { Icon = new IconInfo("\uE93C") }] : [],
                 MoreCommands =
@@ -180,7 +184,8 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
                 Details = new Details
                 {
                     Title = album.Name ?? "Unnamed album",
-                    Body = $"Album by {Utils.Artists(new FullTrack { Artists = album.Artists })}",
+                    Body =
+                        $"Album by {Utils.Text.Artists(new FullTrack { Artists = album.Artists })}",
                     HeroImage = new IconInfo(album.Images?.FirstOrDefault()?.Url ?? "\uE7C3"),
                     Metadata =
                     [
