@@ -84,7 +84,7 @@ internal sealed partial class CurrentlyPlaying : ListPage
 
         return
         [
-            new ListItem(new Commands.LikeCurrentTrack(remove: liked))
+            new ListItem(new Commands.LikeTrack(target: null, remove: liked))
             {
                 Title = liked ? "Remove from liked tracks" : "Like track",
                 Subtitle = liked

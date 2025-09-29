@@ -31,6 +31,10 @@ public partial class TrackItem : ListItem
             {
                 Title = "Open in Spotify",
             },
+            new CommandContextItem(new Commands.LikeTrack(track.Id))
+            {
+                Title = "Add to Liked Songs",
+            },
             new CommandContextItem(new OpenUrlCommand(track.Album?.Uri ?? ""))
             {
                 Icon = new IconInfo("\uE93C"),

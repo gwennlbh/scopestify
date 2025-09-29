@@ -6,55 +6,74 @@ using SpotifyAPI.Web;
 
 namespace ScopestifyExtension.Commands;
 
-internal sealed partial class LikeCurrentTrack(bool remove = false) : InvokableCommand
+/// <summary>
+/// Like or remove like for a track
+/// </summary>
+/// <param name="target">ID of the track to like. Set to null to use the currently playing track.</param>
+/// <param name="remove"></param>
+internal sealed partial class LikeTrack(string? target, bool remove = false) : InvokableCommand
 {
     public override string Name =>
-        remove ? "Remove currently playing from liked tracks" : "Like current track";
+        remove && target == null ? "Remove currently playing from liked tracks"
+        : !remove && target == null ? "Like current track"
+        : remove && target != null ? "Remove from liked tracks"
+        : "Like track";
     public override IconInfo Icon => remove ? new("\uEA92") : new("\uEB51");
 
-    private FullTrack? currentTrack;
+    private FullTrack? track;
 
     private async Task Run()
     {
         var spotify = AuthenticatedSpotifyClient.Get();
 
-        var playback = await spotify.Player.GetCurrentlyPlaying(
-            new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track)
-        );
-
-        currentTrack = playback.Item as FullTrack;
-
-        if (currentTrack == null)
+        if (target != null)
         {
-            throw new InvalidOperationException("No track currently playing");
+            track = await spotify.Tracks.Get(target);
+            if (track == null)
+            {
+                throw new InvalidOperationException($"Track with ID {target} not found");
+            }
+        }
+        else
+        {
+            var playback = await spotify.Player.GetCurrentlyPlaying(
+                new PlayerCurrentlyPlayingRequest(
+                    PlayerCurrentlyPlayingRequest.AdditionalTypes.Track
+                )
+            );
+
+            track = playback.Item as FullTrack;
+
+            if (track == null)
+            {
+                throw new InvalidOperationException("No track currently playing");
+            }
         }
 
         var savedTracks = await spotify.Library.CheckTracks(
-            new LibraryCheckTracksRequest([currentTrack.Id ?? ""])
+            new LibraryCheckTracksRequest([track.Id ?? ""])
         );
 
         if (savedTracks.Count > 0 && savedTracks[0] && !remove)
         {
             throw new InvalidOperationException(
-                $"Track {Utils.Text.TrackFullName(currentTrack)} is already liked"
+                $"Track {Utils.Text.TrackFullName(track)} is already liked"
             );
         }
         else if (remove)
         {
             throw new InvalidOperationException(
-                $"Track {Utils.Text.TrackFullName(currentTrack)} is not liked"
+                $"Track {Utils.Text.TrackFullName(track)} is not liked"
             );
         }
 
         if (remove)
         {
-            await spotify.Library.RemoveTracks(
-                new LibraryRemoveTracksRequest([currentTrack.Id ?? ""])
-            );
+            await spotify.Library.RemoveTracks(new LibraryRemoveTracksRequest([track.Id ?? ""]));
         }
         else
         {
-            await spotify.Library.SaveTracks(new LibrarySaveTracksRequest([currentTrack.Id ?? ""]));
+            await spotify.Library.SaveTracks(new LibrarySaveTracksRequest([track.Id ?? ""]));
         }
     }
 
@@ -87,7 +106,7 @@ internal sealed partial class LikeCurrentTrack(bool remove = false) : InvokableC
                         new ToastArgs
                         {
                             Message =
-                                $"Liked {Utils.Text.TrackFullName(currentTrack)}, but failed to run post-like hook: {ex.Message}",
+                                $"Liked {Utils.Text.TrackFullName(track)}, but failed to run post-like hook: {ex.Message}",
                         }
                     );
                 }
@@ -97,8 +116,8 @@ internal sealed partial class LikeCurrentTrack(bool remove = false) : InvokableC
                 new ToastArgs
                 {
                     Message = remove
-                        ? $"Removed {Utils.Text.TrackFullName(currentTrack)} from liked tracks"
-                        : $"Liked {Utils.Text.TrackFullName(currentTrack)}",
+                        ? $"Removed {Utils.Text.TrackFullName(track)} from liked tracks"
+                        : $"Liked {Utils.Text.TrackFullName(track)}",
                 }
             );
         }
