@@ -83,7 +83,10 @@ internal sealed partial class AddToPlaylistCommand(
         {
             Task.Run(Run).Wait();
             return CommandResult.ShowToast(
-                new ToastArgs { Message = $"Added {Utils.Text.TrackFullName(trackToAdd)} to {name}" }
+                new ToastArgs
+                {
+                    Message = $"Added {Utils.Text.TrackFullName(trackToAdd)} to {name}",
+                }
             );
         }
         catch (Exception ex)
