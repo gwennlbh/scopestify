@@ -5,6 +5,8 @@ public static class Icons
     public static IconInfo WithFallback(string? contents, IconInfo fallback) =>
         contents == null || contents == "" ? fallback : new(contents);
 
+#pragma warning disable CA2211 // Non-constant fields should not be visible
+
     public static IconInfo Add = new("\uE710");
     public static IconInfo Import = new("\uE8B5");
     public static IconInfo Heart = new("\uEB51");
@@ -32,4 +34,6 @@ public static class Icons
 
     // TODO differentiate from You
     public static IconInfo Artist = Contact;
+
+#pragma warning restore CA2211 // Non-constant fields should not be visible
 }
