@@ -54,4 +54,19 @@ public class Text
 
         return $"{Artists(new FullTrack { Artists = album.Artists })} – {album.Name}";
     }
+
+    public static string InfoLine(params string[] parts)
+    {
+        return string.Join(" • ", parts.Where(p => !string.IsNullOrEmpty(p)));
+    }
+
+    public static string Duration(int? ms, string fallback = "")
+    {
+        if (ms == null)
+        {
+            return fallback;
+        }
+
+        return TimeSpan.FromMilliseconds(ms.Value).ToString(@"m\:ss");
+    }
 }

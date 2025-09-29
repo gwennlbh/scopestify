@@ -73,9 +73,7 @@ internal sealed partial class CurrentlyPlaying : ListPage
                 new DetailsElement
                 {
                     Key = "Duration",
-                    Data = new DetailsLink(
-                        TimeSpan.FromMilliseconds(currentTrack.DurationMs).ToString(@"m\:ss")
-                    ),
+                    Data = new DetailsLink(Utils.Text.Duration(currentTrack.DurationMs, "?")),
                 },
                 new DetailsElement
                 {
@@ -104,12 +102,9 @@ internal sealed partial class CurrentlyPlaying : ListPage
             new ListItem(new OpenUrlCommand(currentTrack.Album.Uri ?? ""))
             {
                 Title = "Open album",
-                Subtitle = string.Join(
-                    " • ",
-                    [
-                        currentTrack.Album?.Name ?? "Unknown album",
-                        $"{currentTrack.Album.TotalTracks} tracks",
-                    ]
+                Subtitle = Utils.Text.InfoLine(
+                    currentTrack.Album?.Name ?? "Unknown album",
+                    $"{currentTrack.Album.TotalTracks} tracks"
                 ),
                 Details = details,
                 MoreCommands =

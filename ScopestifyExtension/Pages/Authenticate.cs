@@ -33,14 +33,11 @@ internal sealed partial class Authenticate : ListPage
                 new ListItem(new NoOpCommand())
                 {
                     Title = $"Logged in as {currentUser.DisplayName}",
-                    Subtitle = string.Join(
-                        " • ",
-                        [
-                            currentDevice != null
-                                ? $"Currently playing on {currentDevice.Name}"
-                                : "No device currently active",
-                            $"User ID: {currentUser.Id}",
-                        ]
+                    Subtitle = Utils.Text.InfoLine(
+                        currentDevice != null
+                            ? $"Currently playing on {currentDevice.Name}"
+                            : "No device currently active",
+                        $"User ID: {currentUser.Id}"
                     ),
                     Icon = Icons.WithFallback(currentUser?.Images.FirstOrDefault()?.Url, Icons.You),
                 },

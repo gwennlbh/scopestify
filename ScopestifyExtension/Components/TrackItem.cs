@@ -14,8 +14,9 @@ public partial class TrackItem : ListItem
             Utils.Text.TrackFullName(track),
             enqueue: false
         );
+
         Title = track.Name ?? "Unnamed track";
-        Subtitle = string.Join(" • ", [Utils.Text.Artists(track), track.Album?.Name ?? "No album"]);
+        Subtitle = Utils.Text.InfoLine(Utils.Text.Artists(track), track.Album?.Name ?? "No album");
         Icon = Icons.WithFallback(track.Album?.Images?.FirstOrDefault()?.Url, Icons.MusicNote);
 
         Tags = typeTag ? [new Tag("Track") { Icon = Icons.MusicNote }] : [];
@@ -64,9 +65,7 @@ public partial class TrackItem : ListItem
                 new DetailsElement
                 {
                     Key = "Duration",
-                    Data = new DetailsLink(
-                        TimeSpan.FromMilliseconds(track.DurationMs).ToString(@"m\:ss")
-                    ),
+                    Data = new DetailsLink(Utils.Text.Duration(track.DurationMs, "?")),
                 },
                 new DetailsElement
                 {

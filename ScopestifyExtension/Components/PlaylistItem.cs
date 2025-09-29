@@ -21,15 +21,11 @@ public partial class PlaylistItem : ListItem
 
         Title = playlist?.Name ?? "Unnamed playlist";
 
-        Subtitle = string.Join(
-            " • ",
-            new string[]
-            {
-                playlist?.Owner?.Id == currentUser?.Id ? (highlightYours ? "Your playlist" : "")
+        Subtitle = Utils.Text.InfoLine(
+            playlist?.Owner?.Id == currentUser?.Id ? (highlightYours ? "Your playlist" : "")
                 : playlist?.Owner?.Id != null ? $"By {playlist?.Owner?.DisplayName}"
                 : "",
-                playlist?.Tracks?.Total != null ? $"{playlist?.Tracks.Total} tracks" : "",
-            }.Where(s => !string.IsNullOrEmpty(s))
+            playlist?.Tracks?.Total != null ? $"{playlist?.Tracks.Total} tracks" : ""
         );
 
         Icon = Icons.WithFallback(playlist?.Images?.FirstOrDefault()?.Url, Icons.Playlist);
