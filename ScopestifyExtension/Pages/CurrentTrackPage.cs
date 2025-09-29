@@ -101,7 +101,13 @@ internal sealed partial class CurrentTrackPage : ListPage
             {
                 Icon = new IconInfo("\uE93C"),
                 Title = "Open album",
-                Subtitle = currentTrack.Album?.Name ?? "Unknown album",
+                Subtitle = string.Join(
+                    " • ",
+                    [
+                        currentTrack.Album?.Name ?? "Unknown album",
+                        $"{currentTrack.Album.TotalTracks} tracks",
+                    ]
+                ),
                 Details = details,
                 MoreCommands =
                 [
