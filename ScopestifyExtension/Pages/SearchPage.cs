@@ -27,7 +27,7 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
     private SimpleAlbum[] albums = [];
     private string errorMessage = "";
 
-    private bool labelItemTypes = true;
+    private bool showTypes = true;
 
     public SearchPage()
     {
@@ -83,217 +83,16 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
 
         ListItem[] items =
         [
-            .. tracks.Select(track => new ListItem(
-                new PlayTrackCommand(track.Uri, Utils.Text.TrackFullName(track))
-            )
-            {
-                Title = track.Name ?? "Unnamed track",
-                Subtitle = string.Join(
-                    " • ",
-                    [Utils.Text.Artists(track), track.Album?.Name ?? "No album"]
-                ),
-                Icon = new IconInfo(track.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F"),
-                Tags = labelItemTypes ? [new Tag("Track") { Icon = new IconInfo("\uEC4F") }] : [],
-                MoreCommands =
-                [
-                    new CommandContextItem(
-                        new PlayTrackCommand(
-                            track.Uri,
-                            Utils.Text.TrackFullName(track),
-                            enqueue: true
-                        )
-                    )
-                    {
-                        Title = "Add to queue",
-                        Icon = new IconInfo("\uE710"),
-                    },
-                    new CommandContextItem(new OpenUrlCommand(track.Uri ?? ""))
-                    {
-                        Title = "Open in Spotify",
-                    },
-                    new CommandContextItem(new OpenUrlCommand(track.Album?.Uri ?? ""))
-                    {
-                        Icon = new IconInfo("\uE93C"),
-                        Title =
-                            track.Album.Name == track.Name
-                                ? "Open album in Spotify"
-                                : $"Open {track.Album?.Name} in Spotify",
-                    },
-                ],
-                Details = new Details
-                {
-                    HeroImage = new IconInfo(
-                        track.Album?.Images?.FirstOrDefault()?.Url ?? "\uEC4F"
-                    ),
-                    Title = track.Name ?? "Unnamed track",
-                    Body = Utils.Text.Artists(track),
-                    Metadata =
-                    [
-                        track.Album != null
-                            ? new DetailsElement
-                            {
-                                Key = $"Track {track.TrackNumber} on",
-                                Data = new DetailsLink(track.Album.Uri ?? "", track.Album.Name),
-                            }
-                            : new DetailsElement()
-                            {
-                                Key = "Track is not on any album",
-                                Data = new DetailsLink(""),
-                            },
-                        new DetailsElement
-                        {
-                            Key = "Duration",
-                            Data = new DetailsLink(
-                                TimeSpan.FromMilliseconds(track.DurationMs).ToString(@"m\:ss")
-                            ),
-                        },
-                        new DetailsElement
-                        {
-                            Key = "Track ID",
-                            Data = new DetailsLink(track.Uri ?? "", track.Id ?? "?"),
-                        },
-                    ],
-                },
-            }),
-            .. albums.Select(album => new ListItem(
-                new PlayAlbumCommand(album.Uri, album.Name ?? "Unnamed album", enqueue: false)
-            )
-            {
-                Title = album.Name ?? "Unnamed album",
-                Subtitle = Utils.Text.Artists(new FullTrack { Artists = album.Artists }),
-                Icon = new IconInfo(album.Images?.FirstOrDefault()?.Url ?? "\uE7C3"),
-                Tags = labelItemTypes ? [new Tag("Album") { Icon = new IconInfo("\uE93C") }] : [],
-                MoreCommands =
-                [
-                    new CommandContextItem(
-                        new PlayAlbumCommand(
-                            album.Uri,
-                            album.Name ?? "Unnamed album",
-                            enqueue: true
-                        )
-                    )
-                    {
-                        Title = "Add to queue",
-                        Icon = new IconInfo("\uE710"),
-                    },
-                    new CommandContextItem(new OpenUrlCommand(album.Uri ?? ""))
-                    {
-                        Title = "Open in Spotify",
-                    },
-                ],
-                Details = new Details
-                {
-                    Title = album.Name ?? "Unnamed album",
-                    Body =
-                        $"Album by {Utils.Text.Artists(new FullTrack { Artists = album.Artists })}",
-                    HeroImage = new IconInfo(album.Images?.FirstOrDefault()?.Url ?? "\uE7C3"),
-                    Metadata =
-                    [
-                        new DetailsElement
-                        {
-                            Key = "Released",
-                            Data = new DetailsLink(album.ReleaseDate ?? "?"),
-                        },
-                        new DetailsElement
-                        {
-                            Key = "Tracks",
-                            Data = new DetailsLink(album.TotalTracks.ToString() ?? "?"),
-                        },
-                        new DetailsElement
-                        {
-                            Key = "Album ID",
-                            Data = new DetailsLink(album.Uri ?? "", album.Id ?? "?"),
-                        },
-                    ],
-                },
-            }),
+            .. tracks.Select(track => new Components.TrackItem(track, typeTag: showTypes)),
+            .. albums.Select(album => new Components.AlbumItem(album, typeTag: showTypes)),
             .. playlists
                 .Where(playlist => playlist != null)
-                .Where(playlist => playlist.Tracks?.Total > 0)
-                .Select(playlist => new ListItem(
-                    new PlayPlaylistCommand(
-                        playlist?.Uri ?? "",
-                        playlist?.Name ?? "",
-                        enqueue: false
-                    )
-                )
-                {
-                    Title = playlist?.Name ?? "Unnamed playlist",
-                    Subtitle = string.Join(
-                        " • ",
-                        new string[]
-                        {
-                            playlist?.Owner?.Id == currentUser?.Id ? "Your playlist"
-                            : playlist?.Owner?.Id != null
-                                ? $"Playlist by {playlist?.Owner?.DisplayName}"
-                            : "",
-                            playlist?.Tracks?.Total != null
-                                ? $"{playlist?.Tracks.Total} tracks"
-                                : "",
-                        }.Where(s => !string.IsNullOrEmpty(s))
-                    ),
-                    Icon = new IconInfo(playlist?.Images?.FirstOrDefault()?.Url ?? "\uF147"),
-                    Tags = labelItemTypes
-                        ? [new Tag("Playlist") { Icon = new IconInfo("\uE90B") }]
-                        : [],
-                    MoreCommands =
-                    [
-                        new CommandContextItem(new OpenUrlCommand(playlist.Uri ?? ""))
-                        {
-                            Title = "Open in Spotify",
-                        },
-                        new CommandContextItem(
-                            new PlayPlaylistCommand(
-                                playlist?.Uri ?? "",
-                                playlist?.Name ?? "",
-                                enqueue: true
-                            )
-                        )
-                        {
-                            Title = "Add to queue",
-                            Icon = new IconInfo("\uE710"),
-                        },
-                        new CommandContextItem(
-                            new AddToPlaylistCommand(playlist?.Id ?? "", playlist?.Name ?? "")
-                        )
-                        {
-                            Title = "Add current track",
-                            Icon = new IconInfo("\uE8B5"),
-                        },
-                    ],
-                    Details = new Details
-                    {
-                        Title = playlist?.Name ?? "Unnamed playlist",
-                        Body = playlist?.Description ?? "No description",
-                        HeroImage = new IconInfo(
-                            playlist?.Images?.FirstOrDefault()?.Url ?? "\uF147"
-                        ),
-                        Metadata =
-                        [
-                            new DetailsElement
-                            {
-                                Key = "By",
-                                Data =
-                                    playlist?.Owner?.Id == currentUser?.Id
-                                        ? new DetailsLink("You")
-                                        : new DetailsLink(
-                                            playlist?.Owner?.Uri ?? "",
-                                            playlist?.Owner?.DisplayName ?? "Unknown"
-                                        ),
-                            },
-                            new DetailsElement
-                            {
-                                Key = "Tracks",
-                                Data = new DetailsLink(playlist?.Tracks?.Total.ToString() ?? "?"),
-                            },
-                            new DetailsElement
-                            {
-                                Key = "Playlist ID",
-                                Data = new DetailsLink(playlist?.Uri ?? "", playlist?.Id ?? "?"),
-                            },
-                        ],
-                    },
-                }),
+                .Select(playlist => new Components.PlaylistItem(
+                    playlist,
+                    currentUser,
+                    typeTag: showTypes,
+                    highlightYours: true
+                )),
         ];
 
         // Sort by closest match to start of string
@@ -364,11 +163,11 @@ internal sealed partial class SearchPage : DynamicListPage, IDisposable
             if (OnlyTracks || OnlyAlbums || OnlyPlaylists)
             {
                 query = query[2..].Trim();
-                labelItemTypes = false;
+                showTypes = false;
             }
             else
             {
-                labelItemTypes = true;
+                showTypes = true;
             }
 
             var EnableTracksSearch = !OnlyAlbums && !OnlyPlaylists;

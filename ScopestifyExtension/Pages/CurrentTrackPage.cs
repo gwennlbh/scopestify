@@ -115,7 +115,7 @@ internal sealed partial class CurrentTrackPage : ListPage
                     new CommandContextItem(
                         new PlayAlbumCommand(
                             currentTrack.Album?.Uri ?? "",
-                            currentTrack.Album?.Name ?? "",
+                            Utils.Text.AlbumFullName(currentTrack.Album),
                             enqueue: true
                         )
                     ),

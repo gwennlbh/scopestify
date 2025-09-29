@@ -14,8 +14,6 @@ namespace ScopestifyExtension;
 
 internal sealed partial class MyPlaylistsPage : ListPage
 {
-    private SpotifyClient spotify = AuthenticatedSpotifyClient.Get();
-
     private FullPlaylist[] playlists = [];
     private PrivateUser? currentUser;
 
@@ -32,180 +30,92 @@ internal sealed partial class MyPlaylistsPage : ListPage
 
     public override ListItem[] GetItems()
     {
-        // TODO make this configurabe
-        var discoverWeeklyUri = "spotify:playlist:37i9dQZEVXcW4o4O4AqUHN"; // Discover Weekly
-        var releaseRadarUri = "spotify:playlist:37i9dQZEVXbqiZEgvMyJMk"; // Release Radar
-
         CultureInfo culture = Thread.CurrentThread.CurrentCulture;
 
         return
         [
-            new ListItem(new NoOpCommand())
-            {
-                Title = "Discover Weekly",
-                Subtitle = "Updates every Monday",
-                Tags = [new Tag("Automatic") { Icon = new IconInfo("\uE895") }],
-                // Not sure about the image URL
-                Icon = new IconInfo(
-                    $"https://pickasso.spotifycdn.com/image/ab67c0de0000deef/dt/v1/img/dw/cover/{culture.TwoLetterISOLanguageName}"
-                ),
-                MoreCommands =
-                [
-                    new CommandContextItem(
-                        new PlayPlaylistCommand(
-                            discoverWeeklyUri,
-                            "Discover Weekly",
-                            enqueue: false
-                        )
-                    ),
-                    new CommandContextItem(new OpenUrlCommand(discoverWeeklyUri))
-                    {
-                        Title = "Open in Spotify",
-                    },
-                ],
-                Details = new Details
-                {
-                    Title = "Discover Weekly",
-                    Body =
-                        "Your shortcut to hidden gems, deep cuts, and future faves, updated every Monday. You'll know when you hear it.",
-                    HeroImage = new IconInfo(
-                        $"https://pickasso.spotifycdn.com/image/ab67c0de0000deef/dt/v1/img/dw/cover/{culture.TwoLetterISOLanguageName}"
-                    ),
-                    Metadata =
-                    [
-                        new DetailsElement
-                        {
-                            Key = "For",
-                            Data = new DetailsLink(
-                                currentUser?.Uri ?? "",
-                                currentUser?.DisplayName ?? "Unknown user"
-                            ),
-                        },
-                        new DetailsElement
-                        {
-                            Key = "Playlist ID",
-                            Data = new DetailsLink(
-                                discoverWeeklyUri,
-                                discoverWeeklyUri.Replace("spotify:playlist:", "")
-                            ),
-                        },
-                    ],
-                },
-            },
-            new ListItem(new NoOpCommand())
-            {
-                Title = "Release Radar",
-                Subtitle = "Updates every Friday",
-                Tags = [new Tag("Automatic") { Icon = new IconInfo("\uE895") }],
-                // Not sure about the image URL
-                Icon = new IconInfo(
-                    $"https://newjams-images.scdn.co/image/ab67647800003f8a/dt/v3/release-radar/ab6761610000e5ebe412a782245eb20d9626c601/{culture.TwoLetterISOLanguageName}"
-                ),
-                MoreCommands =
-                [
-                    new CommandContextItem(
-                        new PlayPlaylistCommand(releaseRadarUri, "Release Radar", enqueue: false)
-                    ),
-                    new CommandContextItem(new OpenUrlCommand(releaseRadarUri))
-                    {
-                        Title = "Open in Spotify",
-                    },
-                ],
-                Details = new Details
-                {
-                    Title = "Release Radar",
-                    Body =
-                        "A personalized playlist of new releases, updated every Friday. You'll know when you hear it.",
-                    HeroImage = new IconInfo(
-                        $"https://newjams-images.scdn.co/image/ab67647800003f8a/dt/v3/release-radar/ab6761610000e5ebe412a782245eb20d9626c601/{culture.TwoLetterISOLanguageName}"
-                    ),
-                    Metadata =
-                    [
-                        new DetailsElement
-                        {
-                            Key = "For",
-                            Data = new DetailsLink(
-                                currentUser?.Uri ?? "",
-                                currentUser?.DisplayName ?? "Unknown user"
-                            ),
-                        },
-                        new DetailsElement
-                        {
-                            Key = "Playlist ID",
-                            Data = new DetailsLink(
-                                releaseRadarUri,
-                                releaseRadarUri.Replace("spotify:playlist:", "")
-                            ),
-                        },
-                    ],
-                },
-            },
-            .. playlists.Select(playlist => new ListItem(
-                new AddToPlaylistCommand(playlist.Id ?? "", playlist.Name ?? "")
+            new Components.PlaylistItem(
+                Utils.Playlists.DiscoverWeekly(),
+                currentUser,
+                typeTag: false,
+                highlightYours: false
             )
             {
-                Title = playlist.Name ?? "Unnamed playlist",
-                Subtitle = string.Join(
-                    " • ",
-                    new string[]
+                Subtitle = "Updates every Monday",
+                Tags = [new Tag("Automatic") { Icon = new IconInfo("\uE895") }],
+                Command = new NoOpCommand(),
+                MoreCommands =
+                [
+                    new CommandContextItem(new OpenUrlCommand(Utils.Playlists.DiscoverWeeklyURI))
                     {
-                        playlist.Owner?.Id != currentUser?.Id
-                            ? $"By {playlist.Owner?.DisplayName}"
-                            : "",
-                        playlist.Tracks?.Total != null ? $"{playlist.Tracks.Total} tracks" : "",
-                    }.Where(s => !string.IsNullOrEmpty(s))
-                ),
-                Icon = new IconInfo(playlist.Images?.FirstOrDefault()?.Url ?? "\uF147"),
+                        Title = "Open in Spotify",
+                    },
+                ],
+            },
+            new Components.PlaylistItem(
+                Utils.Playlists.ReleaseRadar(),
+                currentUser,
+                typeTag: false,
+                highlightYours: false
+            )
+            {
+                Subtitle = "Updates every Friday",
+                Tags = [new Tag("Automatic") { Icon = new IconInfo("\uE895") }],
+                Command = new NoOpCommand(),
+                MoreCommands =
+                [
+                    new CommandContextItem(new OpenUrlCommand(Utils.Playlists.ReleaseRadarURI))
+                    {
+                        Title = "Open in Spotify",
+                    },
+                ],
+            },
+            .. playlists.Select(playlist => new Components.PlaylistItem(
+                playlist,
+                currentUser,
+                typeTag: false,
+                highlightYours: false
+            )
+            {
+                Subtitle = $"{playlist.Tracks?.Total ?? 0} tracks",
+                Command = new AddToPlaylistCommand(playlist.Id ?? "", playlist.Name ?? ""),
                 MoreCommands =
                 [
                     new CommandContextItem(
                         new PlayPlaylistCommand(
-                            playlist.Uri ?? "",
-                            playlist.Name ?? "",
+                            playlist?.Uri ?? "",
+                            playlist?.Name ?? "",
                             enqueue: false
                         )
-                    ),
+                    )
+                    {
+                        Title = "Play playlist",
+                        Icon = new IconInfo("\uE768"),
+                    },
+                    new CommandContextItem(
+                        new PlayPlaylistCommand(
+                            playlist?.Uri ?? "",
+                            playlist?.Name ?? "",
+                            enqueue: true
+                        )
+                    )
+                    {
+                        Title = "Add to queue",
+                        Icon = new IconInfo("\uE710"),
+                    },
                     new CommandContextItem(new OpenUrlCommand(playlist.Uri ?? ""))
                     {
                         Title = "Open in Spotify",
                     },
                 ],
-                Details = new Details
-                {
-                    Title = playlist.Name ?? "Unnamed playlist",
-                    Body = playlist.Description ?? "No description",
-                    HeroImage = new IconInfo(playlist.Images?.FirstOrDefault()?.Url ?? "\uF147"),
-                    Metadata =
-                    [
-                        new DetailsElement
-                        {
-                            Key = "By",
-                            Data =
-                                playlist.Owner?.Id == currentUser?.Id
-                                    ? new DetailsLink("You")
-                                    : new DetailsLink(
-                                        playlist.Owner.Uri ?? "",
-                                        playlist.Owner?.DisplayName ?? "Unknown"
-                                    ),
-                        },
-                        new DetailsElement
-                        {
-                            Key = "Tracks",
-                            Data = new DetailsLink(playlist.Tracks?.Total.ToString() ?? "?"),
-                        },
-                        new DetailsElement
-                        {
-                            Key = "Playlist ID",
-                            Data = new DetailsLink(playlist.Uri ?? "", playlist.Id ?? "?"),
-                        },
-                    ],
-                },
             }),
         ];
     }
 
     private async Task LoadData()
     {
+        var spotify = AuthenticatedSpotifyClient.Get();
+
         try
         {
             var playlistsFirstPage = await spotify.Playlists.CurrentUsers();
@@ -218,7 +128,10 @@ internal sealed partial class MyPlaylistsPage : ListPage
         }
         catch (Exception ex)
         {
-            playlists = [new FullPlaylist { Name = "Error fetching playlists", Id = ex.Message }];
+            playlists = [];
+            new ToastStatusMessage(
+                new StatusMessage { Message = ex.InnerException?.Message ?? ex.Message }
+            ).Show();
         }
 
         // TODO make this configurable lol
