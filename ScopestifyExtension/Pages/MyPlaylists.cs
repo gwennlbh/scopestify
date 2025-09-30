@@ -78,7 +78,7 @@ internal sealed partial class MyPlaylists : ListPage
                 highlightYours: false
             )
             {
-                Subtitle = $"{playlist.Tracks?.Total ?? 0} tracks",
+                Subtitle = Utils.Text.CountThing(playlist.Tracks?.Total ?? 0, "track"),
                 Command = new Commands.AddToPlaylist(
                     playlist.Id ?? "",
                     playlist.Name ?? "",

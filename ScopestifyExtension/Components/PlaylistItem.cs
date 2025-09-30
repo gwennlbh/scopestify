@@ -25,7 +25,7 @@ public partial class PlaylistItem : ListItem
             playlist?.Owner?.Id == currentUser?.Id ? (highlightYours ? "Your playlist" : "")
                 : playlist?.Owner?.Id != null ? $"By {playlist?.Owner?.DisplayName}"
                 : "",
-            playlist?.Tracks?.Total != null ? $"{playlist?.Tracks.Total} tracks" : ""
+            Utils.Text.CountThing(playlist.Tracks?.Total ?? 0, "track")
         );
 
         Icon = Icons.WithFallback(playlist?.Images?.FirstOrDefault()?.Url, Icons.Playlist);

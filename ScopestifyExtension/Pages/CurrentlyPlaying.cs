@@ -111,7 +111,7 @@ internal sealed partial class CurrentlyPlaying : ListPage
                 Title = "See album",
                 Subtitle = Utils.Text.InfoLine(
                     currentTrack.Album?.Name ?? "Unknown album",
-                    $"{currentTrack.Album.TotalTracks} tracks"
+                    Utils.Text.CountThing(currentTrack.Album?.TotalTracks ?? 0, "track")
                 ),
                 Details = details,
                 MoreCommands =

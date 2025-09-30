@@ -79,4 +79,21 @@ public class Text
 
         return TimeSpan.FromMilliseconds(ms.Value).ToString(@"m\:ss");
     }
+
+    public static string Pluralize(int count, string singular, string? plural = null)
+    {
+        if (count == 1)
+        {
+            return singular;
+        }
+        else
+        {
+            return plural ?? $"{singular}s";
+        }
+    }
+
+    public static string CountThing(int count, string thing)
+    {
+        return $"{count} {Pluralize(count, thing)}";
+    }
 }
