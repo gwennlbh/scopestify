@@ -24,6 +24,7 @@ internal sealed partial class Search : DynamicListPage, IDisposable
     private PrivateUser? currentUser;
     private FullTrack[] tracks = [];
     private FullPlaylist[] playlists = [];
+    private FullArtist[] artists = [];
     private SimpleAlbum[] albums = [];
     private string errorMessage = "";
 
@@ -40,7 +41,8 @@ internal sealed partial class Search : DynamicListPage, IDisposable
         new CommandItem(new NoOpCommand())
         {
             Title = SearchText == "" ? "Type to search on Spotify" : "No results found",
-            Subtitle = "Use prefixes 't:', 'a:' or 'p:' to search only tracks, albums or playlists",
+            Subtitle =
+                "Use prefixes 't:', 'a:', 'p:' or 'm:' to search only tracks, albums, playlists or artists",
             Icon = Icons.Search,
         };
 
@@ -78,6 +80,7 @@ internal sealed partial class Search : DynamicListPage, IDisposable
         [
             .. tracks.Select(track => new Components.TrackItem(track, typeTag: showTypes)),
             .. albums.Select(album => new Components.AlbumItem(album, typeTag: showTypes)),
+            .. artists.Select(artist => new Components.ArtistItem(artist, typeTag: showTypes)),
             .. playlists
                 .Where(playlist => playlist != null)
                 .Select(playlist => new Components.PlaylistItem(
@@ -152,8 +155,9 @@ internal sealed partial class Search : DynamicListPage, IDisposable
             var OnlyTracks = query.StartsWith("t:");
             var OnlyAlbums = query.StartsWith("a:");
             var OnlyPlaylists = query.StartsWith("p:");
+            var OnlyArtists = query.StartsWith("m:");
 
-            if (OnlyTracks || OnlyAlbums || OnlyPlaylists)
+            if (OnlyTracks || OnlyAlbums || OnlyPlaylists || OnlyArtists)
             {
                 query = query[2..].Trim();
                 showTypes = false;
@@ -163,9 +167,10 @@ internal sealed partial class Search : DynamicListPage, IDisposable
                 showTypes = true;
             }
 
-            var EnableTracksSearch = !OnlyAlbums && !OnlyPlaylists;
-            var EnableAlbumsSearch = !OnlyTracks && !OnlyPlaylists;
-            var EnablePlaylistsSearch = !OnlyTracks && !OnlyAlbums;
+            var EnableTracksSearch = !OnlyAlbums && !OnlyPlaylists && !OnlyArtists;
+            var EnableAlbumsSearch = !OnlyTracks && !OnlyPlaylists && !OnlyArtists;
+            var EnablePlaylistsSearch = !OnlyTracks && !OnlyAlbums && !OnlyArtists;
+            var EnableArtistsSearch = !OnlyTracks && !OnlyAlbums && !OnlyPlaylists;
 
             var searchTrack = EnableTracksSearch
                 ? await spotify.Search.Item(
@@ -185,6 +190,12 @@ internal sealed partial class Search : DynamicListPage, IDisposable
                     _cancellation.Token
                 )
                 : null;
+            var searchArtists = EnableArtistsSearch
+                ? await spotify.Search.Item(
+                    new SearchRequest(SearchRequest.Types.Artist, query),
+                    _cancellation.Token
+                )
+                : null;
 
             IsLoading = false;
 
@@ -194,7 +205,9 @@ internal sealed partial class Search : DynamicListPage, IDisposable
             Debug.WriteLine($"Found {albums.Length} albums");
             playlists = [.. searchPlaylist?.Playlists.Items ?? []];
             Debug.WriteLine($"Found {playlists.Length} playlists");
-            RaiseItemsChanged(tracks.Length + albums.Length + playlists.Length);
+            artists = [.. searchArtists?.Artists.Items ?? []];
+            Debug.WriteLine($"Found {artists.Length} artists");
+            RaiseItemsChanged(tracks.Length + albums.Length + playlists.Length + artists.Length);
             errorMessage = "";
         }
         catch (Exception ex)

@@ -46,6 +46,8 @@ internal sealed partial class CurrentlyPlaying : ListPage
 
         PlaceholderText = $"Currently playing {Utils.Text.TrackFullName(currentTrack)}";
 
+        var multipleArtists = (currentTrack.Artists?.Count ?? 0) > 1;
+
         var details = new Details
         {
             HeroImage = Icons.WithFallback(
@@ -101,7 +103,7 @@ internal sealed partial class CurrentlyPlaying : ListPage
             },
             new ListItem(
                 new AlbumTracks(
-                    currentTrack.Id,
+                    trackId: currentTrack.Id,
                     tagInList: new Tag("Playing") { Icon = Icons.VolumeBars }
                 )
             )
@@ -128,14 +130,16 @@ internal sealed partial class CurrentlyPlaying : ListPage
                 ],
             },
             new ListItem(
-                new OpenUrlCommand(artists.FirstOrDefault()?.Uri ?? "")
-                {
-                    Name = $"See {artists.FirstOrDefault()?.Name}",
-                    Icon = Icons.WithFallback(
-                        artists.FirstOrDefault()?.Images?.FirstOrDefault()?.Url,
-                        Icons.Artist
-                    ),
-                }
+                multipleArtists
+                    ? new Pages.Artists(artists) { Name = "See all artists", Icon = Icons.Group }
+                    : new OpenUrlCommand(artists.FirstOrDefault()?.Uri ?? "")
+                    {
+                        Name = $"See {artists.FirstOrDefault()?.Name}",
+                        Icon = Icons.WithFallback(
+                            artists.FirstOrDefault()?.Images?.FirstOrDefault()?.Url,
+                            Icons.Artist
+                        ),
+                    }
             )
             {
                 Icon = artists.Length > 1 ? Icons.Group : Icons.Artist,
@@ -145,7 +149,6 @@ internal sealed partial class CurrentlyPlaying : ListPage
                 MoreCommands =
                 [
                     .. artists
-                        .Skip(1)
                         .SelectMany<FullArtist, CommandContextItem>(artist =>
                             [
                                 new CommandContextItem(
@@ -161,8 +164,26 @@ internal sealed partial class CurrentlyPlaying : ListPage
                                         Icons.Artist
                                     ),
                                 },
-                                new CommandContextItem(new Commands.FollowArtist(artist)),
+                                new CommandContextItem(
+                                    new ArtistAlbums(artist.Id)
+                                    {
+                                        Name = $"See {artist.Name}'s albums",
+                                    }
+                                )
+                                {
+                                    Title = $"See {artist.Name}'s albums",
+                                    Icon = Icons.MusicAlbum,
+                                },
+                                new CommandContextItem(new Commands.FollowArtist(artist))
+                                {
+                                    Title = $"Follow {artist.Name}",
+                                    Icon = Icons.AddFriend,
+                                },
                             ]
+                        )
+                        .Take(
+                            // First command is the same as the main command if we don't have more than one artist
+                            multipleArtists ? 0 : 1
                         ),
                 ],
             },

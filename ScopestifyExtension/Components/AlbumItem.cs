@@ -6,13 +6,15 @@ using SpotifyAPI.Web;
 
 public partial class AlbumItem : ListItem
 {
-    public AlbumItem(SimpleAlbum album, bool typeTag)
+    public AlbumItem(SimpleAlbum album, bool typeTag, Command? mainCommand = null)
     {
-        Command = new Commands.PlayAlbum(
+        Command defaultMainCommand = new Commands.PlayAlbum(
             album.Uri,
             Utils.Text.AlbumFullName(album),
             enqueue: false
         );
+
+        Command = mainCommand ?? defaultMainCommand;
         Title = album.Name ?? "Unnamed album";
         Subtitle = Utils.Text.Artists(album);
         Icon = Icons.WithFallback(album.Images?.FirstOrDefault()?.Url, Icons.MusicAlbum);
@@ -31,10 +33,19 @@ public partial class AlbumItem : ListItem
                 Title = "Open in Spotify",
             },
         ];
+        if (mainCommand != null)
+        {
+            MoreCommands =
+            [
+                new CommandContextItem(defaultMainCommand) { Title = "Play album" },
+                .. MoreCommands,
+            ];
+        }
+
         Details = new Details
         {
             Title = album.Name ?? "Unnamed album",
-            Body = $"Album by {Utils.Text.Artists(album)}",
+            Body = $"{Utils.Albums.AlbumType(album)} by {Utils.Text.Artists(album)}",
             HeroImage = Icon,
             Metadata =
             [
@@ -47,6 +58,11 @@ public partial class AlbumItem : ListItem
                 {
                     Key = "Tracks",
                     Data = new DetailsLink(album.TotalTracks.ToString() ?? "?"),
+                },
+                new DetailsElement
+                {
+                    Key = "Type",
+                    Data = new DetailsLink(Utils.Albums.AlbumType(album)),
                 },
                 new DetailsElement
                 {

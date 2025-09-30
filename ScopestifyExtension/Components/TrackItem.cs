@@ -36,7 +36,10 @@ public partial class TrackItem : ListItem
             {
                 Title = "Add to Liked Songs",
             },
-            new CommandContextItem(new Pages.AlbumTracks(track.Id)) { Title = "See album tracks" },
+            new CommandContextItem(new Pages.AlbumTracks(trackId: track.Id))
+            {
+                Title = "See album tracks",
+            },
             // TODO causes wayy to many data fetches, MyPlaylists' data should be cached
             // new CommandContextItem(new Pages.MyPlaylists(trackToAdd: track))
             // {

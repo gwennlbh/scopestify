@@ -8,19 +8,21 @@ using SpotifyAPI.Web;
 
 internal sealed partial class AlbumTracks : ListPage
 {
-    private string trackId;
+    private string? trackId;
+    private string? albumId;
     private Tag? tagTrackInList;
     private FullAlbum? album;
     private SimpleTrack[] tracks = [];
     private FullTrack? track;
     private string errorMessage = "";
 
-    public AlbumTracks(string trackId, Tag? tagInList = null)
+    public AlbumTracks(string? albumId = null, string? trackId = null, Tag? tagInList = null)
     {
         this.trackId = trackId;
-        this.tagTrackInList = tagInList;
+        this.albumId = albumId;
+        tagTrackInList = tagInList;
         Id = "currently-playing-album";
-        Name = "Currently playing track's album";
+        Name = "Album's tracks";
         Icon = Icons.MusicAlbum;
         ShowDetails = true;
     }
@@ -80,22 +82,32 @@ internal sealed partial class AlbumTracks : ListPage
     {
         var spotify = AuthenticatedSpotifyClient.Get();
 
-        track = await spotify.Tracks.Get(trackId);
+        if (trackId != null)
+        {
+            track = await spotify.Tracks.Get(trackId);
 
-        if (track?.Album == null)
+            if (track?.Album == null)
+            {
+                album = null;
+                tracks = [];
+                return;
+            }
+
+            if (album != null && album.Id == track.Album.Id)
+            {
+                // Already loaded
+                return;
+            }
+        }
+
+        if (albumId == null && track?.Album == null)
         {
             album = null;
             tracks = [];
             return;
         }
 
-        if (album != null && album.Id == track.Album.Id)
-        {
-            // Already loaded
-            return;
-        }
-
-        album = await spotify.Albums.Get(track.Album.Id);
+        album = await spotify.Albums.Get(albumId ?? track!.Album.Id);
 
         if (album == null)
         {
