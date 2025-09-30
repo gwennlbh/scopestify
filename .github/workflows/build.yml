@@ -52,19 +52,21 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore ScopestifyExtension.sln -p:PublishReadyToRun=true
 
-      - name: Set Version from tag in Appx manifest
+      - name: Resolve version from tag
         if: github.ref_type == 'tag'
         run: |
           $version = "${{ github.ref_name }}" -replace '^v', ''
           Write-Host "Setting version to $version"
-          (Get-Content .\ScopestifyExtension\Package.appxmanifest) -replace '__VERSION__', $version | Set-Content .\ScopestifyExtension\Package.appxmanifest
+          echo "ScopestifyVersion=$version" >> $env:GITHUB_ENV
 
-      - name: Set Version to latest tag in Appx manifest
+      - name: Resolve version to latest tag
         if: github.ref_type != 'tag'
         run: |
           $version = (git tag --sort=-v:refname | Select-Object -First 1) -replace '^v', ''
           Write-Host "Setting version to $version"
-          (Get-Content .\ScopestifyExtension\Package.appxmanifest) -replace '__VERSION__', $version | Set-Content .\ScopestifyExtension\Package.appxmanifest
+
+      - name: Replace version in Appx manifest
+        run: (Get-Content .\ScopestifyExtension\Package.appxmanifest) -replace 'Version="0.0.1.0"', "Version=`"$version`"" | Set-Content .\ScopestifyExtension\Package.appxmanifest
 
       - name: Build
         run: cmd /c "$env:VSDevCmd" "&" msbuild /p:Configuration=${{ matrix.configuration }},Platform=${{ matrix.platform }},GenerateAppxPackageOnBuild=true,OutputPath=.\out /restore ScopestifyExtension.sln
