@@ -81,9 +81,19 @@ _Going from Charli XCX to Nils Frahm without a mouse_
 
 ## Installation
 
-For now, you need to build it from source :/
+### .MSIX package
 
-I'll publish it to the Microsoft Store soon!
+For now, the .msix files available in the Releases tab are self-signed.
+
+The only way (that I know of) to get a free certificate is to publish on the Microsoft Store, and for that I need to upload a govt ID. Mine is not up to date anymore, and it'll take a few months for me to get a new one. In the meantime, you can choose to trust my certificate:
+
+1. Download the .msix you want
+2. Right-click > `Properties` > `Digital Cerificate` 
+3. Select "Gwenn Le Bihan" in the list and click `Details` > `View Certificate` > `Install Certificate`
+4. Select "Local Machine", click `Next`
+5. Select "Place all certificates in the following store", click `Browse`, select `Trusted People`, click `OK`
+6. Click `Next` then `Finish`
+7. Now you can open the .msix and install. Enjoy :)
 
 ### From Source
 
