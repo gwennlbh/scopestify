@@ -76,6 +76,26 @@ jobs:
       - name: Package
         run: cmd /c "$env:VSDevCmd" "&" makeappx pack /d .\ScopestifyExtension\out /p Scopestify-${{ matrix.os }}-${{ matrix.platform }}
 
+      - name: Get signing certificate
+        run: |
+          echo "${{ secrets.SELFSIGNED_PFX_TXT }}" | Out-File -Filepath cert.pfx.txt -Encoding ascii
+          certutil -decode cert.pfx.txt cert.pfx
+          del cert.pfx.txt
+
+      - name: Sign package
+        run: |
+          cmd /c "$env:VSDevCmd" "&" SignTool sign /a `
+            /fd SHA256 `
+            /f cert.pfx `
+            /p "${{ secrets.SELFSIGNED_PFX_PASSWORD }}" `
+            /t http://timestamp.digicert.com `
+            Scopestify-${{ matrix.os }}-${{ matrix.platform }}.msix
+
+      # TODO if i ever get a non-selfsigned cert?
+      # - name: Verify signature
+      #   run: |
+      #     cmd /c "$env:VSDevCmd" "&" SignTool verify /pa /v Scopestify-${{ matrix.os }}-${{ matrix.platform }}.msix
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
