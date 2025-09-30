@@ -31,11 +31,13 @@ internal sealed partial class AlbumTracks : ListPage
             Title =
                 errorMessage != "" ? "An error occured"
                 : album == null ? "No album found"
-                : "Album has no tracks",
+                : album.Tracks.Items.Count == 0 ? "Album has no tracks"
+                : "No results",
             Subtitle =
                 errorMessage != "" ? errorMessage
                 : album == null ? "Play a track from an album to see its details here"
-                : "This album has no tracks",
+                : album.Tracks.Items.Count == 0 ? "This album has no tracks"
+                : "",
             Icon = new IconInfo("🥀"),
         };
 
