@@ -14,7 +14,7 @@ public partial class AlbumItem : ListItem
             enqueue: false
         );
         Title = album.Name ?? "Unnamed album";
-        Subtitle = Utils.Text.Artists(new FullTrack { Artists = album.Artists });
+        Subtitle = Utils.Text.Artists(album);
         Icon = Icons.WithFallback(album.Images?.FirstOrDefault()?.Url, Icons.MusicAlbum);
         Tags = typeTag ? [new Tag("Album") { Icon = Icons.MusicAlbum }] : [];
         MoreCommands =
@@ -34,7 +34,7 @@ public partial class AlbumItem : ListItem
         Details = new Details
         {
             Title = album.Name ?? "Unnamed album",
-            Body = $"Album by {Utils.Text.Artists(new FullTrack { Artists = album.Artists })}",
+            Body = $"Album by {Utils.Text.Artists(album)}",
             HeroImage = Icon,
             Metadata =
             [

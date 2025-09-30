@@ -21,6 +21,16 @@ public class Text
         return Artists(track == null ? null : new SimpleTrack { Artists = track.Artists });
     }
 
+    public static string Artists(SimpleAlbum? album)
+    {
+        return Artists(album == null ? null : new SimpleTrack { Artists = album.Artists });
+    }
+
+    public static string Artists(FullAlbum? album)
+    {
+        return Artists(album == null ? null : new SimpleTrack { Artists = album.Artists });
+    }
+
     public static string TrackFullName(SimpleTrack? track)
     {
         if (track == null)

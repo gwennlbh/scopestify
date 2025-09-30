@@ -65,7 +65,10 @@ internal sealed partial class AlbumTracks : ListPage
             {
                 Section = hasMultipleDiscs ? $"Disc {t.DiscNumber}" : "",
                 Icon = new IconInfo(t.TrackNumber.ToString().PadLeft(2, '0')),
-                Subtitle = Utils.Text.Duration(t.DurationMs),
+                Subtitle = Utils.Text.InfoLine(
+                    Utils.Text.Artists(t) != Utils.Text.Artists(album) ? Utils.Text.Artists(t) : "",
+                    Utils.Text.Duration(t.DurationMs)
+                ),
                 Tags = t.Id == track?.Id && tagTrackInList != null ? [tagTrackInList] : [],
             }),
         ];
