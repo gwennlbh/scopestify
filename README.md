@@ -4,6 +4,10 @@
 
 <p align="center">Control Spotify from the Command Palette</p>
 
+![](./demo.gif)
+
+_Going from Charli XCX to Nils Frahm without a mouse_
+
 ## Features
 
 <table>
