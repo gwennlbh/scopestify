@@ -7,7 +7,7 @@ using SpotifyAPI.Web;
 
 public partial class TrackItem : ListItem
 {
-    public TrackItem(FullTrack track, bool typeTag)
+    public TrackItem(FullTrack track, bool typeTag, FullArtist[]? artists = null)
     {
         Command = new Commands.PlayTrack(
             track.Uri,
@@ -39,6 +39,11 @@ public partial class TrackItem : ListItem
             new CommandContextItem(new Pages.AlbumTracks(trackId: track.Id))
             {
                 Title = "See album tracks",
+            },
+            new CommandContextItem(new Pages.TrackArtists(track.Id))
+            {
+                Title = "See artists",
+                Icon = Icons.Group,
             },
             // TODO causes wayy to many data fetches, MyPlaylists' data should be cached
             // new CommandContextItem(new Pages.MyPlaylists(trackToAdd: track))
