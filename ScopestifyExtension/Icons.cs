@@ -26,6 +26,8 @@ public static class Icons
     public static IconInfo Group = new("\uE902");
     public static IconInfo Sync = new("\uE895");
     public static IconInfo Error = new("\uE783");
+    public static IconInfo AddFriend = new("\uE8FA");
+    public static IconInfo UserRemove = new("\uF69B");
 
     // Aliases
 

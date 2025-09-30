@@ -146,16 +146,24 @@ internal sealed partial class CurrentlyPlaying : ListPage
                 [
                     .. artists
                         .Skip(1)
-                        .Select(artist => new CommandContextItem(
-                            new OpenUrlCommand(artist.Uri ?? "") { Name = $"See {artist.Name}" }
-                        )
-                        {
-                            Title = $"See {artist.Name}",
-                            Icon = Icons.WithFallback(
-                                artist.Images?.FirstOrDefault()?.Url,
-                                Icons.Artist
-                            ),
-                        }),
+                        .SelectMany<FullArtist, CommandContextItem>(artist =>
+                            [
+                                new CommandContextItem(
+                                    new OpenUrlCommand(artist.Uri ?? "")
+                                    {
+                                        Name = $"See {artist.Name}",
+                                    }
+                                )
+                                {
+                                    Title = $"See {artist.Name}",
+                                    Icon = Icons.WithFallback(
+                                        artist.Images?.FirstOrDefault()?.Url,
+                                        Icons.Artist
+                                    ),
+                                },
+                                new CommandContextItem(new Commands.FollowArtist(artist)),
+                            ]
+                        ),
                 ],
             },
             new ListItem(new OpenUrlCommand(currentTrack.Uri))
