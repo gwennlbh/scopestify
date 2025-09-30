@@ -32,7 +32,9 @@ public partial class TrackItem : ListItem
             {
                 Title = "Open in Spotify",
             },
-            new CommandContextItem(new Commands.LikeTrack(track.Id))
+            new CommandContextItem(
+                new Commands.LikeTrack(track.Id, result: CommandResult.Dismiss())
+            )
             {
                 Title = "Add to Liked Songs",
             },

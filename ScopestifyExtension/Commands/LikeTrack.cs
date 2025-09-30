@@ -11,7 +11,12 @@ namespace ScopestifyExtension.Commands;
 /// </summary>
 /// <param name="target">ID of the track to like. Set to null to use the currently playing track.</param>
 /// <param name="remove"></param>
-internal sealed partial class LikeTrack(string? target, bool remove = false) : InvokableCommand
+/// <param name="result">KeepOpen by default</param>
+internal sealed partial class LikeTrack(
+    string? target,
+    bool remove = false,
+    CommandResult? result = null
+) : InvokableCommand
 {
     public override string Name =>
         remove && target == null ? "Remove currently playing from liked tracks"
@@ -20,6 +25,7 @@ internal sealed partial class LikeTrack(string? target, bool remove = false) : I
         : "Like track";
     public override IconInfo Icon => remove ? Icons.HeartBroken : Icons.Heart;
 
+    private CommandResult result = result ?? CommandResult.KeepOpen();
     private FullTrack? track;
 
     private async Task Run()
@@ -105,6 +111,7 @@ internal sealed partial class LikeTrack(string? target, bool remove = false) : I
                     return CommandResult.ShowToast(
                         new ToastArgs
                         {
+                            Result = result,
                             Message =
                                 $"Liked {Utils.Text.TrackFullName(track)}, but failed to run post-like hook: {ex.Message}",
                         }
@@ -115,6 +122,7 @@ internal sealed partial class LikeTrack(string? target, bool remove = false) : I
             return CommandResult.ShowToast(
                 new ToastArgs
                 {
+                    Result = result,
                     Message = remove
                         ? $"Removed {Utils.Text.TrackFullName(track)} from liked tracks"
                         : $"Liked {Utils.Text.TrackFullName(track)}",
@@ -124,7 +132,11 @@ internal sealed partial class LikeTrack(string? target, bool remove = false) : I
         catch (Exception ex)
         {
             return CommandResult.ShowToast(
-                new ToastArgs { Message = ex.InnerException?.Message ?? ex.Message }
+                new ToastArgs
+                {
+                    Result = result,
+                    Message = ex.InnerException?.Message ?? ex.Message,
+                }
             );
         }
     }
