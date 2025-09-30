@@ -1,6 +1,5 @@
-<h1 align=center style="display: flex; align-items: center; gap: 10px; justify-content: center;">
-    <img src="./logo.png" alt="Scopestify logo" height="24px">
-    Scopestify
+<h1 align=center>
+    <img src="./wordmark.png" alt="Scopestify" height="60px">
 </h1>
 
 <p align="center">Control Spotify from the Command Palette</p>
