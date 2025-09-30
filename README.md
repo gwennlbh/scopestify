@@ -4,7 +4,7 @@
 
 <p align="center">Control Spotify from the Command Palette</p>
 
-![](./demo.gif)
+<img src="./demo.gif" width="10000px">
 
 _Going from Charli XCX to Nils Frahm without a mouse_
 
