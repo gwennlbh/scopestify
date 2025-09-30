@@ -135,6 +135,10 @@ internal sealed partial class CurrentlyPlaying : ListPage
                     : new Pages.ArtistAlbums(artists.FirstOrDefault()?.Id ?? "")
                     {
                         Name = $"See {artists.FirstOrDefault()?.Name}",
+                        Icon = Icons.WithFallback(
+                            artists.FirstOrDefault()?.Images?.FirstOrDefault()?.Url,
+                            Icons.Artist
+                        ),
                     }
             )
             {
@@ -151,6 +155,10 @@ internal sealed partial class CurrentlyPlaying : ListPage
                                     new ArtistAlbums(artist.Id)
                                     {
                                         Name = $"See {artist.Name}'s albums",
+                                        Icon = Icons.WithFallback(
+                                            artist.Images?.FirstOrDefault()?.Url,
+                                            Icons.MusicAlbum
+                                        ),
                                     }
                                 )
                                 {

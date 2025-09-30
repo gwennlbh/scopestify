@@ -8,7 +8,11 @@ public partial class ArtistItem : ListItem
 {
     public ArtistItem(FullArtist artist, bool typeTag)
     {
-        Command = new Pages.ArtistAlbums(artist.Id) { Name = $"See {artist.Name}'s albums" };
+        Command = new Pages.ArtistAlbums(artist.Id)
+        {
+            Name = $"See {artist.Name}'s albums",
+            Icon = Icons.WithFallback(artist.Images?.FirstOrDefault()?.Url, Icons.MusicAlbum),
+        };
         Title = artist.Name ?? "Unnamed artist";
         Subtitle = string.Join(", ", artist.Genres ?? []);
         Icon = Icons.WithFallback(artist.Images?.FirstOrDefault()?.Url, Icons.Artist);

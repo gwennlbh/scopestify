@@ -61,7 +61,8 @@ internal sealed partial class ArtistAlbums : ListPage
 
         Name = $"{artist.Name}'s albums";
         PlaceholderText = $"Albums by {artist.Name}";
-        Icon = Icons.WithFallback(artist.Images?.FirstOrDefault()?.Url, Icons.Artist);
+        // FIXME does not work
+        // Icon = Icons.WithFallback(artist.Images?.FirstOrDefault()?.Url, Icons.Artist);
 
         var items = albums
             .Select(album => new Components.AlbumItem(
