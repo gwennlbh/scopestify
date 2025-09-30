@@ -47,6 +47,16 @@ internal sealed partial class MyPlaylists : ListPage
                 Command = new NoOpCommand(),
                 MoreCommands =
                 [
+                    new CommandContextItem(
+                        new Commands.PlayPlaylist(
+                            Utils.Playlists.DiscoverWeeklyURI,
+                            Utils.Playlists.DiscoverWeekly().Name,
+                            enqueue: false
+                        )
+                    )
+                    {
+                        Title = "Play playlist",
+                    },
                     new CommandContextItem(new OpenUrlCommand(Utils.Playlists.DiscoverWeeklyURI))
                     {
                         Title = "Open in Spotify",
@@ -65,6 +75,16 @@ internal sealed partial class MyPlaylists : ListPage
                 Command = new NoOpCommand(),
                 MoreCommands =
                 [
+                    new CommandContextItem(
+                        new Commands.PlayPlaylist(
+                            Utils.Playlists.ReleaseRadarURI,
+                            Utils.Playlists.ReleaseRadar().Name,
+                            enqueue: false
+                        )
+                    )
+                    {
+                        Title = "Play playlist",
+                    },
                     new CommandContextItem(new OpenUrlCommand(Utils.Playlists.ReleaseRadarURI))
                     {
                         Title = "Open in Spotify",

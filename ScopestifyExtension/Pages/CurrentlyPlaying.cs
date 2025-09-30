@@ -131,19 +131,15 @@ internal sealed partial class CurrentlyPlaying : ListPage
             },
             new ListItem(
                 multipleArtists
-                    ? new Pages.Artists(artists) { Name = "See all artists", Icon = Icons.Group }
-                    : new OpenUrlCommand(artists.FirstOrDefault()?.Uri ?? "")
+                    ? new Pages.Artists(artists) { Name = "See all artists" }
+                    : new Pages.ArtistAlbums(artists.FirstOrDefault()?.Id ?? "")
                     {
                         Name = $"See {artists.FirstOrDefault()?.Name}",
-                        Icon = Icons.WithFallback(
-                            artists.FirstOrDefault()?.Images?.FirstOrDefault()?.Url,
-                            Icons.Artist
-                        ),
                     }
             )
             {
                 Icon = artists.Length > 1 ? Icons.Group : Icons.Artist,
-                Title = "See artists",
+                Title = $"See {Utils.Text.Pluralize(artists.Length, "artist")}",
                 Subtitle = Utils.Text.Artists(currentTrack),
                 Details = details,
                 MoreCommands =
@@ -151,19 +147,6 @@ internal sealed partial class CurrentlyPlaying : ListPage
                     .. artists
                         .SelectMany<FullArtist, CommandContextItem>(artist =>
                             [
-                                new CommandContextItem(
-                                    new OpenUrlCommand(artist.Uri ?? "")
-                                    {
-                                        Name = $"See {artist.Name}",
-                                    }
-                                )
-                                {
-                                    Title = $"See {artist.Name}",
-                                    Icon = Icons.WithFallback(
-                                        artist.Images?.FirstOrDefault()?.Url,
-                                        Icons.Artist
-                                    ),
-                                },
                                 new CommandContextItem(
                                     new ArtistAlbums(artist.Id)
                                     {
@@ -173,6 +156,19 @@ internal sealed partial class CurrentlyPlaying : ListPage
                                 {
                                     Title = $"See {artist.Name}'s albums",
                                     Icon = Icons.MusicAlbum,
+                                },
+                                new CommandContextItem(
+                                    new OpenUrlCommand(artist.Uri ?? "")
+                                    {
+                                        Name = $"See {artist.Name} on Spotify",
+                                    }
+                                )
+                                {
+                                    Title = $"Open {artist.Name}",
+                                    Icon = Icons.WithFallback(
+                                        artist.Images?.FirstOrDefault()?.Url,
+                                        Icons.Artist
+                                    ),
                                 },
                                 new CommandContextItem(new Commands.FollowArtist(artist))
                                 {
