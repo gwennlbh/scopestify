@@ -47,14 +47,12 @@ public partial class PlaylistItem : ListItem
             )
             {
                 Title = "Add to queue",
-                Icon = Icons.Import,
             },
             new CommandContextItem(
                 new Commands.AddToPlaylist(playlist?.Id ?? "", playlist?.Name ?? "")
             )
             {
                 Title = "Add current track",
-                Icon = Icons.Add,
             },
         ];
 

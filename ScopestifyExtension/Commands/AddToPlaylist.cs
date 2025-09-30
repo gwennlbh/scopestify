@@ -16,7 +16,7 @@ internal sealed partial class AddToPlaylist(string playlistId, string name, stri
     : InvokableCommand
 {
     public override string Name => "Add current track";
-    public override IconInfo Icon => Icons.Import;
+    public override IconInfo Icon => Icons.Add;
 
     private string playlistId = playlistId;
     private string name = name;
