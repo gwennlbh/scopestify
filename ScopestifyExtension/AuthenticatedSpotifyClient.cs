@@ -77,8 +77,8 @@ class AuthenticatedSpotifyClient
             var tokenAge = DateTime.Now - tokenCreatedAt.Value;
             Debug.WriteLine($"Token age is {tokenAge.TotalSeconds} seconds");
 
-            // If token expires in less than 5 seconds, refresh it
-            if (tokenExpiresIn.Value - tokenAge.TotalSeconds < 5)
+            // If token expires in less than 30 seconds, refresh it
+            if (tokenExpiresIn.Value - tokenAge.TotalSeconds < 30)
             {
                 Debug.WriteLine("Refreshing access token...");
 
