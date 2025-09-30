@@ -62,11 +62,13 @@ jobs:
       - name: Resolve version to latest tag
         if: github.ref_type != 'tag'
         run: |
+          git fetch --tags
           $version = (git tag --sort=-v:refname | Select-Object -First 1) -replace '^v', ''
           Write-Host "Setting version to $version"
+          echo "ScopestifyVersion=$version" >> $env:GITHUB_ENV
 
       - name: Replace version in Appx manifest
-        run: (Get-Content .\ScopestifyExtension\Package.appxmanifest) -replace 'Version="0.0.1.0"', "Version=`"$version`"" | Set-Content .\ScopestifyExtension\Package.appxmanifest
+        run: (Get-Content .\ScopestifyExtension\Package.appxmanifest) -replace 'Version="0.0.1.0"', "Version=`"$env:ScopestifyVersion`"" | Set-Content .\ScopestifyExtension\Package.appxmanifest
 
       - name: Build
         run: cmd /c "$env:VSDevCmd" "&" msbuild /p:Configuration=${{ matrix.configuration }},Platform=${{ matrix.platform }},GenerateAppxPackageOnBuild=true,OutputPath=.\out /restore ScopestifyExtension.sln
