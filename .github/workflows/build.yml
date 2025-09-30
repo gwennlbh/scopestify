@@ -4,9 +4,10 @@ name: Build Scopestify Extension
 # yamllint disable-line rule:truthy
 on:
   push:
-    branches: ["main", "develop"]
+    branches: [main]
+    tags: [v*]
   pull_request:
-    branches: ["main"]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -17,39 +18,77 @@ jobs:
         platform: [x64, arm64]
         os: [windows-latest, windows-11-arm]
         exclude:
-        - os: windows-latest
-          platform: arm64
-        - os: windows-11-arm
-          platform: x64
+          - os: windows-latest
+            platform: arm64
+          - os: windows-11-arm
+            platform: x64
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        clean: true
+      - uses: actions/checkout@v4
+        with:
+          clean: true
 
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.305'
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v2
-      with:
-        vs-version: '17.5'
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.305"
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+        with:
+          vs-version: "17.5"
 
-    - name: Download nuget
-      run: |
-        mkdir ".\.nuget"
-        Invoke-WebRequest "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -OutFile ".\.nuget\nuget.exe"
+      - name: Download nuget
+        run: |
+          mkdir ".\.nuget"
+          Invoke-WebRequest "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -OutFile ".\.nuget\nuget.exe"
 
-    - name: Find VsDevCmd.bat
-      run: |
-        $VSDevCmd = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere" -latest -find Common7\tools\VSDevCmd.bat
-        if (!$VSDevCmd) { exit 1 }
-        echo "Using VSDevCmd: ${VSDevCmd}"
-        Add-Content $env:GITHUB_ENV "VSDevCmd=$VSDevCmd"
+      - name: Find VsDevCmd.bat
+        run: |
+          $VSDevCmd = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere" -latest -find Common7\tools\VSDevCmd.bat
+          if (!$VSDevCmd) { exit 1 }
+          echo "Using VSDevCmd: ${VSDevCmd}"
+          Add-Content $env:GITHUB_ENV "VSDevCmd=$VSDevCmd"
 
-    - name: Restore dependencies
-      run: dotnet restore ScopestifyExtension.sln -p:PublishReadyToRun=true
+      - name: Restore dependencies
+        run: dotnet restore ScopestifyExtension.sln -p:PublishReadyToRun=true
 
-    - name: Build
-      run: cmd /c "$env:VSDevCmd" "&" msbuild /p:Configuration=${{ matrix.configuration }},Platform=${{ matrix.platform }} /restore ScopestifyExtension.sln
+      - name: Set Version in Appx manifest
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          Write-Host "Setting version to $version"
+          (Get-Content .\ScopestifyExtension\Package.appxmanifest) -replace '__VERSION__', $version | Set-Content .\ScopestifyExtension\Package.appxmanifest
+
+      - name: Build
+        run: cmd /c "$env:VSDevCmd" "&" msbuild /p:Configuration=${{ matrix.configuration }},Platform=${{ matrix.platform }},GenerateAppxPackageOnBuild=true,OutputPath=.\out /restore ScopestifyExtension.sln
+
+      - name: Package
+        run: cmd /c "$env:VSDevCmd" "&" makeappx pack /d .\ScopestifyExtension\out /p Scopestify-${{ matrix.os }}-${{ matrix.platform }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Scopestify-${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.configuration }}.msix
+          path: Scopestify-${{ matrix.os }}-${{ matrix.platform }}.msix
+
+  create-release:
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v5
+
+      - name: List files
+        run: ls -R *
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "*/*.msix"
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
