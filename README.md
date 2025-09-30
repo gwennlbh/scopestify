@@ -1,6 +1,9 @@
-# Scopestify
+<h1 align=center style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+    <img src="./logo.png" alt="Scopestify logo" height="24px">
+    Scopestify
+</h1>
 
-Control Spotify from the Command Palette
+<p align="center">Control Spotify from the Command Palette</p>
 
 ## Features
 
