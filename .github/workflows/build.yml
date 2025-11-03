@@ -97,7 +97,7 @@ jobs:
       #     cmd /c "$env:VSDevCmd" "&" SignTool verify /pa /v Scopestify-${{ matrix.os }}-${{ matrix.platform }}.msix
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Scopestify-${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.configuration }}.msix
           path: Scopestify-${{ matrix.os }}-${{ matrix.platform }}.msix
@@ -110,7 +110,7 @@ jobs:
       contents: write
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
 
       - name: List files
         run: ls -R *
