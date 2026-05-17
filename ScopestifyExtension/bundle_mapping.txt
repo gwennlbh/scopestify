@@ -1,0 +1,3 @@
+[Files]
+"AppPackages\ScopestifyExtension_0.0.1.0_x64_Test\ScopestifyExtension_0.0.1.0_x64.msix" "ScopestifyExtension_0.0.1.0_x64.msix"
+"AppPackages\ScopestifyExtension_0.0.1.0_arm64_Test\ScopestifyExtension_0.0.1.0_arm64.msix" "ScopestifyExtension_0.0.1.0_arm64.msix"

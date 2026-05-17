@@ -1,4 +1,4 @@
-namespace ScopestifyExtension.Pages;
+﻿namespace ScopestifyExtension.Pages;
 
 using System;
 using System.Diagnostics;
@@ -167,6 +167,7 @@ internal sealed partial class MyPlaylists : ListPage
         [
             "0PV1qbpUtOyZr3JSRUS1ZA", // slowburn (wont show up, idk why)
             "1fKLy4AW5FA2APBvqAzmiX", // contempl8 (wont show up, idk why)
+            "5OSHD6xIbqQ6z5iFOpv19M", // chill ∩ contempl8 (wont show up, idk why)
         ];
 
         foreach (var playlistId in additionalPlaylistIds)
