@@ -65,12 +65,10 @@ internal sealed partial class AddToPlaylist(string playlistId, string name, stri
 
         await spotify.Playlists.AddItems(
             playlistId,
-            new PlaylistAddItemsRequest(
-                [
-                    trackToAdd?.Uri
-                        ?? throw new InvalidOperationException("No track currently playing"),
-                ]
-            )
+            new PlaylistAddItemsRequest([
+                trackToAdd?.Uri
+                    ?? throw new InvalidOperationException("No track currently playing"),
+            ])
         );
     }
 

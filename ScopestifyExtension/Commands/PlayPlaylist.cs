@@ -31,7 +31,8 @@ sealed partial class PlayPlaylist(string uri, string name, bool? enqueue) : Invo
                     ?.Items?.Where(t => t.Track.Type == ItemType.Track)
                     .Select(t => t.Track as FullTrack)
                     .OrderBy(t => t?.TrackNumber)
-                    .ToArray() ?? [];
+                    .ToArray()
+                ?? [];
 
             foreach (var track in tracks)
             {

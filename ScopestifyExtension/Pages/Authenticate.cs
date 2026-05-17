@@ -75,8 +75,7 @@ internal sealed partial class Authenticate : ListPage
                 new ListItem(
                     new ShowFileInFolderCommand(
                         // Get parent dir of config file
-                        System.IO.Path.GetDirectoryName(ConfigurationFile.Path())
-                        ?? ""
+                        System.IO.Path.GetDirectoryName(ConfigurationFile.Path()) ?? ""
                     )
                 )
                 {
