@@ -12,7 +12,7 @@
     <PackageVersion Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1839" />
     <PackageVersion Include="Microsoft.WindowsAppSDK" Version="1.8.260508005" />
     <PackageVersion Include="Shmuelie.WinRTServer" Version="2.2.1" />
-    <PackageVersion Include="SpotifyAPI.Web" Version="7.2.1" />
+    <PackageVersion Include="SpotifyAPI.Web" Version="7.4.2" />
     <PackageVersion Include="SpotifyAPI.Web.Auth" Version="7.2.1" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <PackageVersion Include="System.Text.Json" Version="10.0.2" />
